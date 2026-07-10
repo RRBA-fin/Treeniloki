@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="fi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0F1214">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Treeniloki">
+<title>Treeniloki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F1214; --surface:#181D21; --surface2:#212930; --border:#2C353D;
+  --text:#E9EDEF; --muted:#8B979F; --accent:#E07A3F; --accent-soft:#3A2A1E;
+  --done:#58B368; --danger:#D95757; --radius:14px;
+}
+[data-theme="light"]{
+  --bg:#F3F5F6; --surface:#FFFFFF; --surface2:#EAEEF0; --border:#D7DDE1;
+  --text:#191D20; --muted:#5F6B72; --accent:#C05E22; --accent-soft:#F6E3D5;
+  --done:#2E8B47; --danger:#C23B3B;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0; padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Archivo',system-ui,sans-serif; font-size:16px;
+  min-height:100vh; padding-bottom:84px;
+}
+h1,h2,h3{margin:0; font-weight:800; letter-spacing:-0.02em}
+button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit}
+input,select{font-family:inherit; font-size:16px; color:var(--text)}
+
+.topbar{
+  position:sticky; top:0; z-index:10; background:var(--bg);
+  padding:16px 18px 10px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.topbar h1{font-size:20px}
+.topbar .sub{font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em}
+.wrap{padding:16px 16px 24px; max-width:560px; margin:0 auto}
+
+.card{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px; margin-bottom:12px;
+}
+.btn{
+  display:block; width:100%; padding:15px; border-radius:var(--radius);
+  background:var(--accent); color:#fff; font-weight:700; font-size:16px;
+  text-align:center; margin-top:10px;
+}
+.btn.secondary{background:var(--surface2); color:var(--text); border:1px solid var(--border)}
+.btn.ghost{background:none; color:var(--muted); border:1px dashed var(--border)}
+.btn.danger{background:none; color:var(--danger); border:1px solid var(--danger)}
+.btn:active{transform:scale(0.98)}
+.btn[disabled]{opacity:0.4}
+
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0}
+.chip{
+  padding:9px 14px; border-radius:999px; background:var(--surface2);
+  border:1px solid var(--border); font-weight:600; font-size:14px;
+}
+.chip.on{background:var(--accent); border-color:var(--accent); color:#fff}
+
+.field{margin-bottom:12px}
+.field label{display:block; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted); margin-bottom:6px}
+.field input[type=text]{
+  width:100%; padding:13px; border-radius:12px; background:var(--surface2);
+  border:1px solid var(--border);
+}
+
+/* Stepper */
+.stepper{display:flex; align-items:center; gap:6px}
+.stepper button{
+  width:44px; height:44px; border-radius:12px; background:var(--surface2);
+  border:1px solid var(--border); font-size:22px; font-weight:700; flex:none;
+  display:flex; align-items:center; justify-content:center;
+}
+.stepper button:active{background:var(--accent); color:#fff}
+.stepper input{
+  width:64px; height:44px; text-align:center; background:none; border:none;
+  font-weight:800; font-size:19px; -moz-appearance:textfield;
+}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none}
+.steplabel{font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; text-align:center; margin-bottom:4px}
+
+.exrow{border-bottom:1px solid var(--border); padding:12px 0}
+.exrow:last-child{border-bottom:none}
+.exhead{display:flex; justify-content:space-between; align-items:center; gap:8px}
+.exname{font-weight:700; font-size:16px}
+.exmeta{font-size:12px; color:var(--muted)}
+.exctrl{display:flex; gap:14px; margin-top:10px; flex-wrap:wrap}
+.xdel{color:var(--danger); font-size:13px; font-weight:600; padding:6px}
+
+/* Set logging */
+.setrow{
+  display:flex; align-items:center; gap:5px; padding:8px 0;
+  border-bottom:1px dashed var(--border);
+}
+.setrow:last-of-type{border-bottom:none}
+.setnum{width:18px; font-weight:800; color:var(--muted); flex:none; font-size:13px}
+.setrow .stepper{flex:1; min-width:0; gap:3px}
+.setrow .stepper button{width:34px; min-width:34px; height:42px; font-size:18px; border-radius:10px}
+.setrow .stepper input{width:100%; min-width:28px; font-size:16px; padding:0}
+.donebtn{
+  width:40px; height:42px; border-radius:10px; flex:none;
+  border:2px solid var(--border); font-size:18px; color:var(--muted);
+}
+.donebtn.on{background:var(--done); border-color:var(--done); color:#fff}
+
+/* Modal */
+.modal{position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:50; display:flex; align-items:flex-end}
+.sheet{
+  background:var(--surface); width:100%; max-height:85vh; overflow-y:auto;
+  border-radius:20px 20px 0 0; padding:16px; max-width:560px; margin:0 auto;
+}
+.search{
+  width:100%; padding:13px; border-radius:12px; background:var(--surface2);
+  border:1px solid var(--border); margin-bottom:10px;
+}
+.pickrow{
+  padding:13px 6px; border-bottom:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.pickrow:active{background:var(--surface2)}
+
+/* Bottom nav */
+.nav{
+  position:fixed; bottom:0; left:0; right:0; z-index:20;
+  background:var(--surface); border-top:1px solid var(--border);
+  display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.nav button{flex:1; padding:8px 4px; font-size:11px; font-weight:700; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:3px}
+.nav button.on{color:var(--accent)}
+.nav .ico{font-size:20px}
+
+/* History */
+.hcard{cursor:pointer}
+.hhead{display:flex; justify-content:space-between; align-items:baseline}
+.htitle{font-weight:800; font-size:16px}
+.hdate{font-size:12px; color:var(--muted); font-weight:600}
+.htag{display:inline-block; margin-top:4px; font-size:11px; font-weight:700; color:var(--accent); background:var(--accent-soft); padding:3px 9px; border-radius:999px}
+.hdetail{margin-top:10px; border-top:1px solid var(--border); padding-top:8px; font-size:14px}
+.hdetail .l{display:flex; justify-content:space-between; padding:4px 0; gap:8px}
+.hdetail .l span:last-child{color:var(--muted); text-align:right}
+
+.empty{text-align:center; color:var(--muted); padding:40px 20px; font-weight:600}
+.summ{font-size:15px; line-height:1.55}
+.badge-ok{color:var(--done); font-weight:700}
+.badge-miss{color:var(--accent); font-weight:700}
+.smallnote{font-size:12px; color:var(--muted); margin-top:8px; line-height:1.5}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div>
+    <h1 id="tTitle">Treeniloki</h1>
+    <div class="sub" id="tSub"></div>
+  </div>
+  <button id="profileBtn" style="font-weight:700; color:var(--accent); font-size:14px"></button>
+</div>
+<div class="wrap" id="app"></div>
+<div class="nav" id="nav" style="display:none">
+  <button data-v="home"><span class="ico">🏠</span>Koti</button>
+  <button data-v="plan"><span class="ico">＋</span>Uusi treeni</button>
+  <button data-v="history"><span class="ico">📖</span>Historia</button>
+  <button data-v="settings"><span class="ico">⚙️</span>Asetukset</button>
+</div>
+
+<script>
+/* ============================================================
+   LIIKEPANKKI — laajenna lisäämällä rivejä tähän taulukkoon.
+   f: push | pull | legs | core   laite: tanko|käsipainot|talja|kone|keho|smith
+   ============================================================ */
+const LIIKKEET=[
+{id:"penkki",fi:"Penkkipunnerrus",en:"Bench Press",r:"Rinta",f:"push",laite:"tanko"},
+{id:"vinopenkki",fi:"Vinopenkkipunnerrus",en:"Incline Bench Press",r:"Rinta",f:"push",laite:"tanko"},
+{id:"kp-penkki",fi:"Penkkipunnerrus käsipainoilla",en:"Dumbbell Bench Press",r:"Rinta",f:"push",laite:"käsipainot"},
+{id:"kp-vinopenkki",fi:"Vinopenkki käsipainoilla",en:"Incline DB Press",r:"Rinta",f:"push",laite:"käsipainot"},
+{id:"dippi",fi:"Dippi",en:"Dips",r:"Rinta",f:"push",laite:"keho"},
+{id:"punnerrus",fi:"Punnerrus",en:"Push-up",r:"Rinta",f:"push",laite:"keho"},
+{id:"ristikkais",fi:"Ristikkäistalja",en:"Cable Fly",r:"Rinta",f:"push",laite:"talja"},
+{id:"penkki-kone",fi:"Penkkipunnerrus koneella",en:"Chest Press Machine",r:"Rinta",f:"push",laite:"kone"},
+{id:"leuanveto",fi:"Leuanveto",en:"Pull-up",r:"Selkä",f:"pull",laite:"keho"},
+{id:"ylatalja",fi:"Ylätalja",en:"Lat Pulldown",r:"Selkä",f:"pull",laite:"talja"},
+{id:"kulmasoutu",fi:"Kulmasoutu",en:"Barbell Row",r:"Selkä",f:"pull",laite:"tanko"},
+{id:"kp-soutu",fi:"Käsipainosoutu",en:"Dumbbell Row",r:"Selkä",f:"pull",laite:"käsipainot"},
+{id:"alatalja",fi:"Alatalja / istumasoutu",en:"Seated Cable Row",r:"Selkä",f:"pull",laite:"talja"},
+{id:"t-soutu",fi:"T-tankosoutu",en:"T-Bar Row",r:"Selkä",f:"pull",laite:"tanko"},
+{id:"maastaveto",fi:"Maastaveto",en:"Deadlift",r:"Selkä",f:"pull",laite:"tanko"},
+{id:"selanojennus",fi:"Selänojennus",en:"Back Extension",r:"Selkä",f:"pull",laite:"keho"},
+{id:"facepull",fi:"Face pull",en:"Face Pull",r:"Olkapäät",f:"pull",laite:"talja"},
+{id:"pullover",fi:"Pullover taljassa",en:"Cable Pullover",r:"Selkä",f:"pull",laite:"talja"},
+{id:"olankohautus",fi:"Olankohautus",en:"Shrug",r:"Selkä",f:"pull",laite:"käsipainot"},
+{id:"kyykky",fi:"Kyykky",en:"Back Squat",r:"Jalat",f:"legs",laite:"tanko"},
+{id:"etukyykky",fi:"Etukyykky",en:"Front Squat",r:"Jalat",f:"legs",laite:"tanko"},
+{id:"goblet",fi:"Goblet-kyykky",en:"Goblet Squat",r:"Jalat",f:"legs",laite:"käsipainot"},
+{id:"smith-kyykky",fi:"Smith-kyykky",en:"Smith Squat",r:"Jalat",f:"legs",laite:"smith"},
+{id:"jalkaprassi",fi:"Jalkaprässi",en:"Leg Press",r:"Jalat",f:"legs",laite:"kone"},
+{id:"askelkyykky",fi:"Askelkyykky",en:"Lunge",r:"Jalat",f:"legs",laite:"käsipainot"},
+{id:"bulgarialainen",fi:"Bulgarialainen askelkyykky",en:"Bulgarian Split Squat",r:"Jalat",f:"legs",laite:"käsipainot"},
+{id:"ojennus",fi:"Jalkojen ojennus",en:"Leg Extension",r:"Jalat",f:"legs",laite:"kone"},
+{id:"koukistus",fi:"Jalkojen koukistus",en:"Leg Curl",r:"Jalat",f:"legs",laite:"kone"},
+{id:"rdl",fi:"Romanialainen maastaveto",en:"Romanian Deadlift",r:"Jalat",f:"legs",laite:"tanko"},
+{id:"lantionnosto",fi:"Lantionnosto",en:"Hip Thrust",r:"Jalat",f:"legs",laite:"tanko"},
+{id:"pohkeet-seisten",fi:"Pohkeet seisten",en:"Standing Calf Raise",r:"Jalat",f:"legs",laite:"kone"},
+{id:"pohkeet-istuen",fi:"Pohkeet istuen",en:"Seated Calf Raise",r:"Jalat",f:"legs",laite:"kone"},
+{id:"pystypunnerrus",fi:"Pystypunnerrus",en:"Overhead Press",r:"Olkapäät",f:"push",laite:"tanko"},
+{id:"kp-pystypunnerrus",fi:"Pystypunnerrus käsipainoilla",en:"DB Shoulder Press",r:"Olkapäät",f:"push",laite:"käsipainot"},
+{id:"vipunosto-sivu",fi:"Vipunostot sivulle",en:"Lateral Raise",r:"Olkapäät",f:"push",laite:"käsipainot"},
+{id:"vipunosto-etu",fi:"Vipunostot eteen",en:"Front Raise",r:"Olkapäät",f:"push",laite:"käsipainot"},
+{id:"talja-vipu",fi:"Vipunosto taljassa",en:"Cable Lateral Raise",r:"Olkapäät",f:"push",laite:"talja"},
+{id:"pystysoutu",fi:"Pystysoutu",en:"Upright Row",r:"Olkapäät",f:"pull",laite:"tanko"},
+{id:"takaolkapaat",fi:"Takaolkapäät (reverse fly)",en:"Reverse Fly",r:"Olkapäät",f:"pull",laite:"käsipainot"},
+{id:"hauis-tanko",fi:"Hauiskääntö tangolla",en:"Barbell Curl",r:"Kädet",f:"pull",laite:"tanko"},
+{id:"hauis-kp",fi:"Hauiskääntö käsipainoilla",en:"Dumbbell Curl",r:"Kädet",f:"pull",laite:"käsipainot"},
+{id:"hammer",fi:"Hammer curl",en:"Hammer Curl",r:"Kädet",f:"pull",laite:"käsipainot"},
+{id:"talja-hauis",fi:"Hauiskääntö taljassa",en:"Cable Curl",r:"Kädet",f:"pull",laite:"talja"},
+{id:"ojentaja-talja",fi:"Ojentajapunnerrus taljassa",en:"Triceps Pushdown",r:"Kädet",f:"push",laite:"talja"},
+{id:"ranskalainen",fi:"Ranskalainen punnerrus",en:"Skull Crusher",r:"Kädet",f:"push",laite:"tanko"},
+{id:"kapea-penkki",fi:"Kapea penkkipunnerrus",en:"Close-Grip Bench",r:"Kädet",f:"push",laite:"tanko"},
+{id:"ojentaja-kp",fi:"Ojentaja käsipainolla pään yli",en:"Overhead Triceps Ext.",r:"Kädet",f:"push",laite:"käsipainot"},
+{id:"lankku",fi:"Lankku",en:"Plank",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"vatsarutistus",fi:"Vatsarutistus",en:"Crunch",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"talja-rutistus",fi:"Taljarutistus",en:"Cable Crunch",r:"Keskivartalo",f:"core",laite:"talja"},
+{id:"jalkojen-nosto",fi:"Jalkojen nosto roikkuen",en:"Hanging Leg Raise",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"venalainen",fi:"Venäläinen kierto",en:"Russian Twist",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"kp-fly",fi:"Vipunostot penkillä (fly)",en:"Dumbbell Fly",r:"Rinta",f:"push",laite:"käsipainot"},
+{id:"pec-deck",fi:"Pec deck",en:"Pec Deck",r:"Rinta",f:"push",laite:"kone"},
+{id:"vino-fly",fi:"Vinopenkki fly",en:"Incline Fly",r:"Rinta",f:"push",laite:"käsipainot"},
+{id:"kapea-ylatalja",fi:"Kapea ylätalja (V-kahva)",en:"Close-Grip Pulldown",r:"Selkä",f:"pull",laite:"talja"},
+{id:"tuettu-soutu",fi:"Penkkituettu soutu",en:"Chest Supported Row",r:"Selkä",f:"pull",laite:"käsipainot"},
+{id:"yhden-kaden-talja",fi:"Yhden käden ylätalja",en:"Single-Arm Pulldown",r:"Selkä",f:"pull",laite:"talja"},
+{id:"rack-pull",fi:"Telineveto (rack pull)",en:"Rack Pull",r:"Selkä",f:"pull",laite:"tanko"},
+{id:"vaakaleuka",fi:"Vaakaleuanveto",en:"Inverted Row",r:"Selkä",f:"pull",laite:"keho"},
+{id:"hack",fi:"Hack-kyykky",en:"Hack Squat",r:"Jalat",f:"legs",laite:"kone"},
+{id:"sumomaastaveto",fi:"Sumomaastaveto",en:"Sumo Deadlift",r:"Jalat",f:"legs",laite:"tanko"},
+{id:"good-morning",fi:"Hyvää huomenta",en:"Good Morning",r:"Jalat",f:"legs",laite:"tanko"},
+{id:"step-up",fi:"Askellus penkille",en:"Step-up",r:"Jalat",f:"legs",laite:"käsipainot"},
+{id:"adduktori",fi:"Lähentäjät koneella",en:"Adductor Machine",r:"Jalat",f:"legs",laite:"kone"},
+{id:"abduktori",fi:"Loitontajat koneella",en:"Abductor Machine",r:"Jalat",f:"legs",laite:"kone"},
+{id:"pohkeet-prassi",fi:"Pohkeet prässissä",en:"Calf Press",r:"Jalat",f:"legs",laite:"kone"},
+{id:"nordic",fi:"Nordic hamstring",en:"Nordic Curl",r:"Jalat",f:"legs",laite:"keho"},
+{id:"arnold",fi:"Arnold-punnerrus",en:"Arnold Press",r:"Olkapäät",f:"push",laite:"käsipainot"},
+{id:"landmine",fi:"Landmine-punnerrus",en:"Landmine Press",r:"Olkapäät",f:"push",laite:"tanko"},
+{id:"talja-takaolkapaat",fi:"Takaolkapäät taljassa",en:"Cable Reverse Fly",r:"Olkapäät",f:"pull",laite:"talja"},
+{id:"preacher",fi:"Scott-penkki hauiskääntö",en:"Preacher Curl",r:"Kädet",f:"pull",laite:"tanko"},
+{id:"keskitetty",fi:"Keskitetty hauiskääntö",en:"Concentration Curl",r:"Kädet",f:"pull",laite:"käsipainot"},
+{id:"penkkidippi",fi:"Ojentajadippi penkillä",en:"Bench Dip",r:"Kädet",f:"push",laite:"keho"},
+{id:"kickback",fi:"Ojentajan takaisku",en:"Triceps Kickback",r:"Kädet",f:"push",laite:"käsipainot"},
+{id:"rannekaanto",fi:"Rannekääntö",en:"Wrist Curl",r:"Kädet",f:"pull",laite:"käsipainot"},
+{id:"sivulankku",fi:"Sivulankku",en:"Side Plank",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"vatsarulla",fi:"Vatsarulla",en:"Ab Wheel",r:"Keskivartalo",f:"core",laite:"muu"},
+{id:"pallof",fi:"Pallof-punnerrus",en:"Pallof Press",r:"Keskivartalo",f:"core",laite:"talja"},
+{id:"dead-bug",fi:"Kuollut kuoriainen",en:"Dead Bug",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"vuorikiipeilija",fi:"Vuorikiipeilijä",en:"Mountain Climber",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"polvien-nosto",fi:"Polvien nosto roikkuen",en:"Hanging Knee Raise",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"heilautus",fi:"Kahvakuulaheilautus",en:"Kettlebell Swing",r:"Toiminnallinen",f:"legs",laite:"kahvakuula"},
+{id:"kb-clean",fi:"Kahvakuulan rinnalleveto",en:"Kettlebell Clean",r:"Toiminnallinen",f:"pull",laite:"kahvakuula"},
+{id:"thruster",fi:"Thruster",en:"Thruster",r:"Toiminnallinen",f:"push",laite:"tanko"},
+{id:"burpee",fi:"Burpee",en:"Burpee",r:"Toiminnallinen",f:"core",laite:"keho"},
+{id:"farmari",fi:"Farmarikävely",en:"Farmer's Carry",r:"Toiminnallinen",f:"pull",laite:"käsipainot"},
+{id:"boxjump",fi:"Boksihyppy",en:"Box Jump",r:"Toiminnallinen",f:"legs",laite:"keho"},
+{id:"soutulaite",fi:"Soutulaite",en:"Rowing Machine",r:"Toiminnallinen",f:"pull",laite:"kone"},
+{id:"kelkka",fi:"Kelkan työntö",en:"Sled Push",r:"Toiminnallinen",f:"legs",laite:"muu"}
+];
+const KOHTEET=["Selkä","Rinta","Jalat","Olkapäät","Kädet","Keskivartalo","Ylävartalo","Työntävät","Vetävät","Koko keho","Toiminnallinen"];
+const RYHMAT=["Kaikki","Rinta","Selkä","Jalat","Olkapäät","Kädet","Keskivartalo","Toiminnallinen"];
+const liike=id=>LIIKKEET.find(l=>l.id===id)||{fi:"?",r:""};
+
+/* ---------- Tallennus ---------- */
+const S={
+  get:(k,d)=>{try{const v=localStorage.getItem("tl:"+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set:(k,v)=>localStorage.setItem("tl:"+k,JSON.stringify(v)),
+  del:k=>localStorage.removeItem("tl:"+k)
+};
+const pk=k=>"p:"+state.profile+":"+k;
+
+/* ---------- Progressiomoottori (double progression) ---------- */
+function lastPerf(liikeId){
+  const hist=S.get(pk("history"),[]);
+  for(const h of hist){
+    const e=h.exercises.find(x=>x.liikeId===liikeId);
+    if(e&&e.sets.some(s=>s.done))return e;
+  }
+  return null;
+}
+function failStreak(liikeId,weight){
+  const hist=S.get(pk("history"),[]);let n=0;
+  for(const h of hist){
+    const e=h.exercises.find(x=>x.liikeId===liikeId);
+    if(!e||!e.sets.some(s=>s.done))continue;
+    const done=e.sets.filter(s=>s.done);
+    const w=Math.max(...done.map(s=>s.w));
+    const met=done.length>=e.target.sets&&done.every(s=>s.r>=e.target.reps);
+    if(!met&&Math.abs(w-weight)<0.01)n++;else break;
+  }
+  return n;
+}
+function suggestFor(liikeId){
+  const e=lastPerf(liikeId);if(!e)return null;
+  const L=liike(liikeId),t=e.target,done=e.sets.filter(s=>s.done);
+  const w=Math.max(...done.map(s=>s.w));
+  const total=done.reduce((s,x)=>s+x.r,0),tgt=t.sets*t.reps;
+  const met=done.length>=t.sets&&done.every(s=>s.r>=t.reps);
+  const last=`Viimeksi ${done.map(s=>fmtW(s.w)+"×"+s.r).join(", ")}`;
+  if(met){
+    if(L.laite==="keho")
+      return{w,reps:t.reps+1,sets:t.sets,last,msg:`✅ Tavoite täyttyi → lisää toistoja: ${t.reps+1}/sarja`};
+    return{w:w+2.5,reps:t.reps,sets:t.sets,last,msg:`✅ Tavoite täyttyi → lisää painoa: ${fmtW(w+2.5)} kg`};
+  }
+  if(failStreak(liikeId,w)>=3){
+    const nw=Math.max(0,Math.round(w*0.9/2.5)*2.5);
+    return{w:nw,reps:t.reps,sets:t.sets,last,msg:`⬇ Jäänyt vajaaksi 3 kertaa peräkkäin → kevennä ${fmtW(nw)} kg:aan ja rakenna uudelleen`};
+  }
+  if(total>=tgt*0.85)
+    return{w,reps:t.reps,sets:t.sets,last,msg:`🔁 Lähellä (${total}/${tgt} toistoa) — samat painot, yritä täyttää toistot`};
+  return{w,reps:t.reps,sets:t.sets,last,msg:`🔁 Jäi vajaaksi (${total}/${tgt} toistoa) — samat painot uudestaan`};
+}
+
+/* ---------- Vaihe 3: tavoitteet, generaattori, balanssi ---------- */
+const GOALS={
+  "Lihaskasvu":{sets:3,reps:10},
+  "Voima":{sets:5,reps:5},
+  "Peruskunto":{sets:3,reps:12},
+  "Lihaskestävyys":{sets:3,reps:15},
+  "Toiminnallinen":{sets:3,reps:12}
+};
+const GEN={
+  "Selkä":{paa:["maastaveto","kulmasoutu","leuanveto"],apu:[["ylatalja","kapea-ylatalja"],["alatalja","tuettu-soutu","kp-soutu"],["pullover","yhden-kaden-talja"],["facepull","takaolkapaat"],["hauis-tanko","hauis-kp","talja-hauis"],["selanojennus","rack-pull"],["olankohautus"]]},
+  "Rinta":{paa:["penkki","kp-penkki"],apu:[["vinopenkki","kp-vinopenkki"],["ristikkais","kp-fly","pec-deck"],["dippi","punnerrus"],["vino-fly"],["ojentaja-talja","ranskalainen"],["kickback","ojentaja-kp"]]},
+  "Jalat":{paa:["kyykky","jalkaprassi","smith-kyykky"],apu:[["rdl","koukistus"],["askelkyykky","bulgarialainen","step-up"],["ojennus"],["lantionnosto"],["adduktori","abduktori"],["pohkeet-seisten","pohkeet-istuen","pohkeet-prassi"],["nordic","good-morning"]]},
+  "Olkapäät":{paa:["pystypunnerrus","kp-pystypunnerrus"],apu:[["vipunosto-sivu","talja-vipu"],["takaolkapaat","talja-takaolkapaat","facepull"],["arnold","landmine"],["vipunosto-etu","pystysoutu"],["olankohautus"]]},
+  "Kädet":{paa:["kapea-penkki","dippi"],apu:[["hauis-tanko","hauis-kp"],["ojentaja-talja","kickback"],["hammer","talja-hauis"],["ranskalainen","ojentaja-kp"],["preacher","keskitetty"],["rannekaanto"]]},
+  "Keskivartalo":{paa:["jalkojen-nosto","vatsarulla"],apu:[["lankku","sivulankku"],["talja-rutistus","vatsarutistus"],["pallof","venalainen"],["dead-bug","vuorikiipeilija"],["polvien-nosto"]]},
+  "Ylävartalo":{paa:["penkki","kp-penkki"],apu:[["kulmasoutu","alatalja","tuettu-soutu"],["pystypunnerrus","kp-pystypunnerrus"],["ylatalja","leuanveto"],["vipunosto-sivu","talja-vipu"],["hauis-kp","hauis-tanko"],["ojentaja-talja","ranskalainen"],["facepull","takaolkapaat"]]},
+  "Työntävät":{paa:["penkki","kp-penkki"],apu:[["pystypunnerrus","kp-pystypunnerrus"],["vinopenkki","kp-vinopenkki"],["vipunosto-sivu","talja-vipu"],["dippi","punnerrus"],["ojentaja-talja","ranskalainen"],["ristikkais","pec-deck"]]},
+  "Vetävät":{paa:["maastaveto","kulmasoutu"],apu:[["leuanveto","ylatalja"],["alatalja","kp-soutu","tuettu-soutu"],["facepull","takaolkapaat"],["hauis-tanko","hauis-kp"],["olankohautus"],["pullover","rannekaanto"]]},
+  "Koko keho":{paa:["kyykky","maastaveto"],apu:[["penkki","kp-penkki"],["kulmasoutu","alatalja"],["pystypunnerrus","kp-pystypunnerrus"],["ylatalja","leuanveto"],["rdl","lantionnosto"],["lankku","talja-rutistus"],["askelkyykky","heilautus"]]},
+  "Toiminnallinen":{paa:["thruster","heilautus"],apu:[["kb-clean","heilautus"],["burpee","vuorikiipeilija"],["farmari"],["boxjump","step-up"],["soutulaite","kelkka"],["lankku","sivulankku"]]}
+};
+const DEFW={keho:0,tanko:20,"käsipainot":10,talja:20,kone:30,smith:20,kahvakuula:12,muu:0};
+window.generateWorkout=()=>{
+  const t=state.gen.target;if(!t)return;
+  const goal=S.get(pk("goal"),"Lihaskasvu"),g=GOALS[goal];
+  const tpl=GEN[t];
+  const n=Math.min(state.gen.n,1+tpl.apu.length);
+  const pick=c=>c[Math.floor(Math.random()*c.length)];
+  const mk=(id,scheme)=>{
+    const sg=suggestFor(id);
+    if(sg)return{liikeId:id,sets:sg.sets,reps:sg.reps,weight:sg.w};
+    const L=liike(id);
+    return{liikeId:id,sets:scheme.sets,reps:scheme.reps,weight:DEFW[L.laite]??20};
+  };
+  // Pääliike: raskas moninivelliike, enemmän sarjoja ja vähemmän toistoja
+  const mainScheme={sets:Math.min(g.sets+1,5),reps:Math.max(5,g.reps-4)};
+  const mainId=pick(tpl.paa);
+  const used=new Set([mainId]);
+  const exercises=[mk(mainId,mainScheme)];
+  for(const slot of tpl.apu){
+    if(exercises.length>=n)break;
+    const cands=slot.filter(id=>!used.has(id));
+    if(!cands.length)continue;
+    const id=pick(cands);used.add(id);
+    exercises.push(mk(id,g));
+  }
+  state.plan={name:t+" · "+goal.toLowerCase(),target:t,exercises};
+  go("plan");
+};
+function weeklyBalance(extra){
+  const week=Date.now()-7*864e5;
+  const tally={push:0,pull:0,legs:0,core:0};
+  S.get(pk("history"),[]).forEach(h=>{
+    if(h.startedAt>week)h.exercises.forEach(e=>{
+      tally[liike(e.liikeId).f]+=e.sets.filter(s=>s.done).length;
+    });
+  });
+  (extra||[]).forEach(e=>{tally[liike(e.liikeId).f]+=Number(e.sets)||0});
+  const notes=[];
+  if(tally.push+tally.pull>=8){
+    if(tally.push>tally.pull*1.75)notes.push(`⚖️ Viikon volyymi painottuu työntäviin (${tally.push} vs ${tally.pull} sarjaa). Lisää vetäviä liikkeitä (soutu, ylätalja) tasapainoksi.`);
+    if(tally.pull>tally.push*1.75)notes.push(`⚖️ Viikon volyymi painottuu vetäviin (${tally.pull} vs ${tally.push} sarjaa). Lisää työntäviä liikkeitä tasapainoksi.`);
+  }
+  if(tally.legs===0&&tally.push+tally.pull>=12)notes.push("🦵 Jalkasarjoja ei ole viikon sisällä vielä yhtään.");
+  return{tally,notes};
+}
+const state={
+  view:"profiles", profile:S.get("lastProfile",null),
+  plan:null, active:null, pickerFilter:"Kaikki", pickerSearch:"",
+  gen:{target:null,n:5},
+  openHist:null
+};
+document.documentElement.dataset.theme=S.get("theme","dark");
+
+/* ---------- Apurit ---------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtDate=ts=>new Date(ts).toLocaleDateString("fi-FI",{weekday:"short",day:"numeric",month:"numeric",year:"numeric"});
+const fmtW=w=>(w%1===0?w:w.toFixed(1).replace(".",","));
+
+function go(v){state.view=v;render()}
+
+function stepperHTML(label,path,val,step,min,unit){
+  return `<div>
+    <div class="steplabel">${label}</div>
+    <div class="stepper">
+      <button onclick="stepVal('${path}',${-step},${min})">−</button>
+      <input type="number" inputmode="decimal" value="${val}" onchange="setVal('${path}',this.value,${min})">
+      <button onclick="stepVal('${path}',${step},${min})">+</button>
+    </div>
+    ${unit?`<div class="steplabel" style="margin-top:2px">${unit}</div>`:""}
+  </div>`;
+}
+function resolve(path){
+  const p=path.split(".");let o=state;
+  for(let i=0;i<p.length-1;i++)o=o[p[i]];
+  return[o,p[p.length-1]];
+}
+window.stepVal=(path,d,min)=>{
+  const[o,k]=resolve(path);
+  o[k]=Math.max(min,Math.round((Number(o[k])+d)*100)/100);
+  persistActive();render();
+};
+window.setVal=(path,v,min)=>{
+  const[o,k]=resolve(path);
+  const n=parseFloat(String(v).replace(",","."));
+  o[k]=isNaN(n)?min:Math.max(min,n);
+  persistActive();render();
+};
+function persistActive(){if(state.active&&state.profile)S.set(pk("active"),state.active)}
+
+/* ---------- Näkymät ---------- */
+function render(){
+  const app=$("app"),nav=$("nav");
+  $("profileBtn").textContent=state.profile?"👤 "+state.profile:"";
+  $("profileBtn").onclick=()=>{state.profile=null;go("profiles")};
+  nav.style.display=(state.view==="profiles")?"none":"flex";
+  nav.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.v===state.view));
+  const subs={home:"Etusivu",plan:"Uusi treeni",generate:"Generoi treeni",workout:"Treeni käynnissä",summary:"Yhteenveto",history:"Historia",settings:"Asetukset",profiles:"Valitse profiili"};
+  $("tSub").textContent=subs[state.view]||"";
+  app.innerHTML=({profiles:vProfiles,home:vHome,plan:vPlan,generate:vGenerate,workout:vWorkout,summary:vSummary,history:vHistory,settings:vSettings}[state.view])();
+}
+$("nav").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.v==="plan")startPlan();else go(b.dataset.v);
+});
+
+/* Profiilit */
+function vProfiles(){
+  const profs=S.get("profiles",[]);
+  return `<div class="card">
+    <h2 style="font-size:18px; margin-bottom:8px">Kuka treenaa?</h2>
+    ${profs.length?profs.map(p=>`<button class="btn secondary" onclick="pickProfile('${esc(p)}')">👤 ${esc(p)}</button>`).join(""):'<div class="empty">Ei vielä profiileja</div>'}
+    <div class="field" style="margin-top:16px"><label>Uusi profiili</label>
+      <input type="text" id="newProf" placeholder="Nimi">
+    </div>
+    <button class="btn" onclick="addProfile()">Luo profiili</button>
+  </div>`;
+}
+window.pickProfile=p=>{state.profile=p;S.set("lastProfile",p);
+  state.active=S.get(pk("active"),null);
+  go(state.active?"workout":"home");
+};
+window.addProfile=()=>{
+  const n=$("newProf").value.trim();if(!n)return;
+  const profs=S.get("profiles",[]);
+  if(!profs.includes(n)){profs.push(n);S.set("profiles",profs)}
+  pickProfile(n);
+};
+
+/* Koti */
+function vHome(){
+  const hist=S.get(pk("history"),[]);
+  const last=hist.slice(0,3);
+  return `
+    ${state.active?`<div class="card" style="border-color:var(--accent)"><b>Kesken oleva treeni:</b> ${esc(state.active.name)}<button class="btn" onclick="go('workout')">Jatka treeniä</button></div>`:""}
+    <button class="btn" onclick="startPlan()">＋ Suunnittele uusi treeni</button>
+    <button class="btn secondary" onclick="state.gen={target:null,n:5};go('generate')">🎲 Generoi treeni</button>
+    <button class="btn secondary" onclick="go('history')">Selaa historiaa (${hist.length})</button>
+    ${last.length?`<h3 style="font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin:20px 0 8px">Viimeisimmät</h3>`:'<div class="empty">Ensimmäinen treeni odottaa 💪</div>'}
+    ${last.map(h=>histCard(h,false)).join("")}
+  `;
+}
+
+/* Generaattori */
+function vGenerate(){
+  const goal=S.get(pk("goal"),"Lihaskasvu");
+  const g=state.gen;
+  const maxN=g.target?1+GEN[g.target].apu.length:8;
+  if(g.n>maxN)g.n=maxN;
+  return `<div class="card">
+    <div class="field"><label>Kohde</label>
+      <div class="chips">${Object.keys(GEN).map(k=>`<button class="chip ${g.target===k?"on":""}" onclick="state.gen.target='${k}';render()">${k}</button>`).join("")}</div>
+    </div>
+    <div class="field"><label>Tavoite (vaihda asetuksista)</label>
+      <div style="font-weight:700">${goal} — ${GOALS[goal].sets} sarjaa × ${GOALS[goal].reps} toistoa</div>
+    </div>
+    <div class="field"><label>Liikkeiden määrä (max ${maxN})</label>
+      ${stepperHTML("",`gen.n`,g.n,1,3)}
+    </div>
+  </div>
+  <button class="btn" ${g.target?"":"disabled"} onclick="generateWorkout()">Generoi ▶</button>
+  <div class="smallnote">Treenin rakenne: ensimmäisenä yksi raskas moninivelinen pääliike (enemmän sarjoja, vähemmän toistoja), sen jälkeen kevyempiä apu- ja eristäviä liikkeitä tavoitteesi kaavalla. Liikkeissä on satunnaista vaihtelua, ja tutuille liikkeille painot esitäyttyvät treenihistoriastasi. Voit muokata treeniä vapaasti ennen aloitusta.</div>`;
+}
+
+/* Suunnittelu */
+function startPlan(){
+  state.plan={name:"",target:null,exercises:[]};
+  go("plan");
+}
+window.repeatWorkout=id=>{
+  const h=S.get(pk("history"),[]).find(x=>x.id===id);if(!h)return;
+  state.plan={name:h.name,target:h.target,
+    exercises:h.exercises.map(e=>{
+      const done=e.sets.filter(s=>s.done);
+      const w=done.length?Math.max(...done.map(s=>s.w)):e.target.weight;
+      return {liikeId:e.liikeId,sets:e.target.sets,reps:e.target.reps,weight:w};
+    })};
+  go("plan");
+};
+function vPlan(){
+  const p=state.plan;
+  return `<div class="card">
+    <div class="field"><label>Treenin nimi</label>
+      <input type="text" value="${esc(p.name)}" placeholder="esim. Selkä + hauis"
+        onchange="state.plan.name=this.value">
+    </div>
+    <div class="field"><label>Kohde</label>
+      <div class="chips">${KOHTEET.map(k=>`<button class="chip ${p.target===k?"on":""}" onclick="setTarget('${k}')">${k}</button>`).join("")}</div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:15px; margin-bottom:4px">Liikkeet</h3>
+    ${p.exercises.length?"":'<div class="empty" style="padding:20px">Lisää ensimmäinen liike</div>'}
+    ${p.exercises.map((e,i)=>{const L=liike(e.liikeId);return `
+      <div class="exrow">
+        <div class="exhead">
+          <div><div class="exname">${L.fi}</div><div class="exmeta">${L.r} · ${L.laite}</div></div>
+          <button class="xdel" onclick="state.plan.exercises.splice(${i},1);render()">Poista</button>
+        </div>
+        <div class="exctrl">
+          ${stepperHTML("Sarjat",`plan.exercises.${i}.sets`,e.sets,1,1)}
+          ${stepperHTML("Tavoitetoistot",`plan.exercises.${i}.reps`,e.reps,1,1)}
+          ${stepperHTML(L.laite==="keho"?"Lisäpaino":"Paino",`plan.exercises.${i}.weight`,e.weight,2.5,0,"kg")}
+        </div>
+        ${(sg=>sg?`<div class="smallnote">${sg.last}<br>${sg.msg}</div>`:"")(suggestFor(e.liikeId))}
+      </div>`}).join("")}
+    <button class="btn ghost" onclick="openPicker()">＋ Lisää liike</button>
+  </div>
+  ${(b=>`<div class="card">
+    <h3 style="font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em">Viikkobalanssi (7 pv + tämä treeni)</h3>
+    <div style="font-weight:700; margin-top:6px; font-size:14px">Työntävät ${b.tally.push} · Vetävät ${b.tally.pull} · Jalat ${b.tally.legs} · Keskivartalo ${b.tally.core} sarjaa</div>
+    ${b.notes.map(n=>`<div class="smallnote" style="color:var(--accent)">${n}</div>`).join("")}
+  </div>`)(weeklyBalance(p.exercises))}
+  <button class="btn" ${p.exercises.length?"":"disabled"} onclick="beginWorkout()">Aloita treeni ▶</button>
+  <div id="picker"></div>`;
+}
+window.setTarget=k=>{
+  state.plan.target=k;
+  if(!state.plan.name)state.plan.name=k;
+  render();
+};
+
+/* Liikevalitsin */
+window.openPicker=()=>{state.pickerSearch="";state.pickerFilter="Kaikki";renderPicker()};
+window.closePicker=()=>{$("picker").innerHTML=""};
+function renderPicker(){
+  const q=state.pickerSearch.toLowerCase(),f=state.pickerFilter;
+  const list=LIIKKEET.filter(l=>
+    (f==="Kaikki"||l.r===f)&&
+    (!q||l.fi.toLowerCase().includes(q)||l.en.toLowerCase().includes(q)));
+  $("picker").innerHTML=`<div class="modal" onclick="if(event.target===this)closePicker()">
+    <div class="sheet">
+      <input class="search" placeholder="Hae liikettä…" value="${esc(state.pickerSearch)}"
+        oninput="state.pickerSearch=this.value;renderPicker();this.focus()" autofocus>
+      <div class="chips">${RYHMAT.map(r=>`<button class="chip ${f===r?"on":""}" onclick="state.pickerFilter='${r}';renderPicker()">${r}</button>`).join("")}</div>
+      ${list.map(l=>`<div class="pickrow" onclick="pickExercise('${l.id}')">
+        <div><div class="exname">${l.fi}</div><div class="exmeta">${l.r} · ${l.laite}</div></div><div style="color:var(--accent); font-weight:800">＋</div>
+      </div>`).join("")||'<div class="empty">Ei osumia</div>'}
+      <button class="btn secondary" onclick="closePicker()">Sulje</button>
+    </div></div>`;
+  const inp=$("picker").querySelector(".search");
+  inp&&inp.focus();inp&&inp.setSelectionRange(inp.value.length,inp.value.length);
+}
+window.pickExercise=id=>{
+  const sg=suggestFor(id);
+  state.plan.exercises.push(sg
+    ?{liikeId:id,sets:sg.sets,reps:sg.reps,weight:sg.w}
+    :{liikeId:id,sets:3,reps:10,weight:20});
+  closePicker();render();
+};
+
+/* Treeni */
+window.beginWorkout=()=>{
+  const p=state.plan;
+  state.active={
+    id:Date.now(),name:p.name||p.target||"Treeni",target:p.target,startedAt:Date.now(),
+    exercises:p.exercises.map(e=>({
+      liikeId:e.liikeId,target:{sets:e.sets,reps:e.reps,weight:e.weight},
+      sets:Array.from({length:e.sets},()=>({w:e.weight,r:e.reps,done:false}))
+    }))
+  };
+  persistActive();go("workout");
+};
+function vWorkout(){
+  const a=state.active;
+  if(!a)return vHome();
+  return `<div class="card"><h2 style="font-size:17px">${esc(a.name)}</h2>
+    ${a.target?`<span class="htag">${a.target}</span>`:""}</div>
+  ${a.exercises.map((e,i)=>{const L=liike(e.liikeId);return `
+    <div class="card">
+      <div class="exhead"><div><div class="exname">${L.fi}</div>
+        <div class="exmeta">Tavoite: ${e.target.sets} × ${e.target.reps} @ ${fmtW(e.target.weight)} kg${L.laite==="keho"?" lisäpainoa":""}</div></div></div>
+      <div style="display:flex; gap:8px; margin-top:8px; font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.05em">
+        <span style="width:18px"></span><span style="flex:1; text-align:center">${L.laite==="keho"?"Lisäpaino (kg)":"Paino (kg)"}</span><span style="flex:1; text-align:center">Toistot</span><span style="width:40px"></span>
+      </div>
+      ${e.sets.map((s,j)=>`<div class="setrow">
+        <div class="setnum">${j+1}</div>
+        <div class="stepper">
+          <button onclick="stepVal('active.exercises.${i}.sets.${j}.w',-2.5,0)">−</button>
+          <input type="number" inputmode="decimal" value="${s.w}" onchange="setVal('active.exercises.${i}.sets.${j}.w',this.value,0)">
+          <button onclick="stepVal('active.exercises.${i}.sets.${j}.w',2.5,0)">+</button>
+        </div>
+        <div class="stepper">
+          <button onclick="stepVal('active.exercises.${i}.sets.${j}.r',-1,0)">−</button>
+          <input type="number" inputmode="numeric" value="${s.r}" onchange="setVal('active.exercises.${i}.sets.${j}.r',this.value,0)">
+          <button onclick="stepVal('active.exercises.${i}.sets.${j}.r',1,0)">+</button>
+        </div>
+        <button class="donebtn ${s.done?"on":""}" onclick="toggleSet(${i},${j})">✓</button>
+      </div>`).join("")}
+      <button class="btn ghost" style="padding:10px" onclick="addSet(${i})">＋ Lisäsarja</button>
+    </div>`}).join("")}
+  <button class="btn" onclick="finishWorkout()">Merkitse treeni valmiiksi ✔</button>
+  <button class="btn danger" onclick="cancelWorkout()">Hylkää treeni</button>`;
+}
+window.toggleSet=(i,j)=>{
+  state.active.exercises[i].sets[j].done=!state.active.exercises[i].sets[j].done;
+  persistActive();render();
+};
+window.addSet=i=>{
+  const sets=state.active.exercises[i].sets;
+  const last=sets[sets.length-1];
+  sets.push({w:last.w,r:last.r,done:false});
+  persistActive();render();
+};
+window.cancelWorkout=()=>{
+  if(!confirm("Hylätäänkö treeni tallentamatta?"))return;
+  state.active=null;S.del(pk("active"));go("home");
+};
+window.finishWorkout=()=>{
+  const a=state.active;
+  a.finishedAt=Date.now();
+  const hist=S.get(pk("history"),[]);
+  hist.unshift(a);S.set(pk("history"),hist);
+  state.lastSaved=a;state.active=null;S.del(pk("active"));
+  go("summary");
+};
+
+/* Yhteenveto */
+function vSummary(){
+  const a=state.lastSaved;
+  if(!a)return vHome();
+  const dur=Math.round((a.finishedAt-a.startedAt)/60000);
+  let totalTarget=0,totalDone=0,rows="";
+  a.exercises.forEach(e=>{
+    const done=e.sets.filter(s=>s.done);
+    const reps=done.reduce((s,x)=>s+x.r,0);
+    const tgt=e.target.sets*e.target.reps;
+    totalTarget+=tgt;totalDone+=reps;
+    const maxW=done.length?Math.max(...done.map(s=>s.w)):0;
+    const ok=reps>=tgt&&done.length>=e.target.sets;
+    rows+=`<div class="l"><span>${liike(e.liikeId).fi}</span>
+      <span class="${ok?"badge-ok":"badge-miss"}">${done.length}/${e.target.sets} sarjaa · ${reps}/${tgt} toistoa · max ${fmtW(maxW)} kg</span></div>`;
+  });
+  const pct=totalTarget?Math.round(totalDone/totalTarget*100):0;
+  return `<div class="card">
+    <h2 style="font-size:18px">${esc(a.name)} ✔</h2>
+    <div class="summ" style="margin-top:8px">
+      Kesto ${dur} min · Toistotavoitteesta täyttyi <b style="color:${pct>=100?"var(--done)":"var(--accent)"}">${pct} %</b>
+    </div>
+    <div class="hdetail">${rows}</div>
+    <h3 style="font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-top:14px">Ehdotus seuraavaan treeniin</h3>
+    <div class="hdetail" style="border-top:none; padding-top:2px">
+      ${a.exercises.map(e=>{const sg=suggestFor(e.liikeId);
+        return sg?`<div class="l"><span>${liike(e.liikeId).fi}</span><span>${sg.msg}</span></div>`:"";
+      }).join("")}
+    </div>
+    <div class="smallnote">Ehdotukset perustuvat double progression -malliin: kun kaikki sarjat täyttävät toistotavoitteen, lisätään painoa (+2,5 kg); muuten samat painot ja toistojen täyttäminen. Ehdotukset esitäyttyvät automaattisesti, kun lisäät saman liikkeen seuraavaan treeniin.</div>
+  </div>
+  ${a.brief?`<div class="card"><h3 style="font-size:15px">✨ AI-brief</h3><div class="summ" style="margin-top:6px">${esc(a.brief)}</div></div>`
+    :S.get("apikey","")?`<button class="btn secondary" ${state.briefLoading?"disabled":""} onclick="aiBrief()">${state.briefLoading?"⏳ Luodaan briefiä…":"✨ Luo AI-brief treenistä"}</button>`
+    :`<div class="smallnote" style="text-align:center">Vinkki: lisää Anthropic API-avain asetuksissa, niin saat treenistä sanallisen valmentaja-briefin.</div>`}
+  ${state.briefError?`<div class="smallnote" style="color:var(--danger); text-align:center">${esc(state.briefError)}</div>`:""}
+  <button class="btn" onclick="go('home')">Valmis</button>`;
+}
+window.aiBrief=async()=>{
+  const a=state.lastSaved;if(!a||state.briefLoading)return;
+  state.briefLoading=true;state.briefError=null;render();
+  const goal=S.get(pk("goal"),"Lihaskasvu");
+  const rows=a.exercises.map(e=>{
+    const done=e.sets.filter(s=>s.done);
+    return `- ${liike(e.liikeId).fi}: tavoite ${e.target.sets}×${e.target.reps} @ ${e.target.weight} kg, toteuma: ${done.map(s=>fmtW(s.w)+" kg × "+s.r).join(", ")||"ei kirjattuja sarjoja"}`;
+  }).join("\n");
+  const prompt=`Treeni: ${a.name} (kohde: ${a.target||"yleinen"}). Treenaajan tavoite: ${goal}. Kesto: ${Math.round((a.finishedAt-a.startedAt)/60000)} min.\nLiikkeet:\n${rows}\n\nKirjoita lyhyt valmentajan brief suomeksi (enintään 100 sanaa, yhtenäistä tekstiä ilman listoja): miten treeni meni suhteessa tavoitteisiin, mihin keskittyä seuraavalla saman lihasryhmän kerralla, ja yksi palautumisvinkki.`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "x-api-key":S.get("apikey",""),
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:400,
+        messages:[{role:"user",content:prompt}]})
+    });
+    const j=await res.json();
+    if(j.error)throw new Error(j.error.message||"API-virhe");
+    const txt=(j.content||[]).filter(c=>c.type==="text").map(c=>c.text).join(" ").trim();
+    if(!txt)throw new Error("Tyhjä vastaus");
+    a.brief=txt;
+    const hist=S.get(pk("history"),[]);
+    const i=hist.findIndex(h=>h.id===a.id);
+    if(i>=0){hist[i].brief=txt;S.set(pk("history"),hist)}
+  }catch(e){state.briefError="Briefin luonti epäonnistui: "+e.message}
+  state.briefLoading=false;render();
+};
+
+/* Historia */
+function histCard(h,expandable=true){
+  const open=state.openHist===h.id;
+  const nSets=h.exercises.reduce((s,e)=>s+e.sets.filter(x=>x.done).length,0);
+  let det="";
+  if(open){
+    det=`<div class="hdetail">${h.exercises.map(e=>{
+      const done=e.sets.filter(s=>s.done);
+      const str=done.map(s=>`${fmtW(s.w)}×${s.r}`).join(", ")||"—";
+      return `<div class="l"><span>${liike(e.liikeId).fi}</span><span>${str}</span></div>`;
+    }).join("")}
+    ${h.brief?`<div class="smallnote">✨ ${esc(h.brief)}</div>`:""}
+    <button class="btn secondary" onclick="event.stopPropagation();repeatWorkout(${h.id})">🔁 Tee uudelleen pohjana</button>
+    <button class="btn danger" onclick="event.stopPropagation();delWorkout(${h.id})">Poista</button></div>`;
+  }
+  return `<div class="card hcard" ${expandable?`onclick="state.openHist=state.openHist===${h.id}?null:${h.id};render()"`:""}>
+    <div class="hhead"><div class="htitle">${esc(h.name)}</div><div class="hdate">${fmtDate(h.startedAt)}</div></div>
+    ${h.target?`<span class="htag">${h.target}</span>`:""}
+    <span class="htag" style="background:var(--surface2); color:var(--muted)">${h.exercises.length} liikettä · ${nSets} sarjaa</span>
+    ${det}</div>`;
+}
+/* Kehityskäyrät */
+function exStats(liikeId){
+  const hist=S.get(pk("history"),[]).slice().reverse();
+  const pts=[];
+  hist.forEach(h=>{
+    const e=h.exercises.find(x=>x.liikeId===liikeId);
+    if(!e)return;
+    const done=e.sets.filter(s=>s.done);
+    if(!done.length)return;
+    pts.push({
+      t:h.startedAt,
+      max:Math.max(...done.map(s=>s.w)),
+      e1rm:Math.round(Math.max(...done.map(s=>s.w*(1+s.r/30)))*10)/10,
+      vol:Math.round(done.reduce((s,x)=>s+x.w*x.r,0))
+    });
+  });
+  return pts;
+}
+function chartSVG(pts,metric){
+  if(pts.length<2)return '<div class="empty">Käyrä piirtyy, kun liikkeestä on vähintään kaksi kirjattua treeniä</div>';
+  const vals=pts.map(p=>p[metric]);
+  const min=Math.min(...vals),max=Math.max(...vals),pad=(max-min)||1;
+  const lo=min-pad*0.15,hi=max+pad*0.15;
+  const W=320,H=170,L=38,R=10,T=16,B=24;
+  const x=i=>L+(W-L-R)*i/(pts.length-1);
+  const y=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo));
+  const line=pts.map((p,i)=>`${x(i).toFixed(1)},${y(p[metric]).toFixed(1)}`).join(" ");
+  const dots=pts.map((p,i)=>
+    `<circle cx="${x(i).toFixed(1)}" cy="${y(p[metric]).toFixed(1)}" r="3.5" fill="var(--accent)"/>`+
+    (pts.length<=10?`<text x="${x(i).toFixed(1)}" y="${(y(p[metric])-8).toFixed(1)}" font-size="9" fill="var(--muted)" text-anchor="middle">${fmtW(p[metric])}</text>`:"")
+  ).join("");
+  const dd=t=>new Date(t).toLocaleDateString("fi-FI",{day:"numeric",month:"numeric"});
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%; margin-top:6px">
+    <line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="var(--border)"/>
+    <text x="${L-4}" y="${y(max)+3}" font-size="9" fill="var(--muted)" text-anchor="end">${fmtW(max)}</text>
+    <text x="${L-4}" y="${y(min)+3}" font-size="9" fill="var(--muted)" text-anchor="end">${fmtW(min)}</text>
+    <text x="${L}" y="${H-8}" font-size="9" fill="var(--muted)">${dd(pts[0].t)}</text>
+    <text x="${W-R}" y="${H-8}" font-size="9" fill="var(--muted)" text-anchor="end">${dd(pts[pts.length-1].t)}</text>
+    <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    ${dots}
+  </svg>`;
+}
+function vHistory(){
+  const hist=S.get(pk("history"),[]);
+  const tab=state.histTab||"list";
+  const tabs=`<div class="chips" style="margin-top:0">
+    <button class="chip ${tab==="list"?"on":""}" onclick="state.histTab='list';render()">Treenit</button>
+    <button class="chip ${tab==="charts"?"on":""}" onclick="state.histTab='charts';render()">📈 Kehitys</button>
+  </div>`;
+  if(tab==="charts"){
+    const ids=[...new Set(hist.flatMap(h=>h.exercises.filter(e=>e.sets.some(s=>s.done)).map(e=>e.liikeId)))];
+    ids.sort((a,b)=>liike(a).fi.localeCompare(liike(b).fi,"fi"));
+    if(!ids.length)return tabs+'<div class="empty">Ei vielä dataa käyriin</div>';
+    if(!state.chartLiike||!ids.includes(state.chartLiike))state.chartLiike=ids[0];
+    const m=state.chartMetric||"max";
+    const pts=exStats(state.chartLiike);
+    const labels={max:"Max paino",e1rm:"Arvioitu 1RM",vol:"Volyymi"};
+    return tabs+`<div class="card">
+      <select class="search" onchange="state.chartLiike=this.value;render()">
+        ${ids.map(id=>`<option value="${id}" ${id===state.chartLiike?"selected":""}>${liike(id).fi}</option>`).join("")}
+      </select>
+      <div class="chips">${Object.entries(labels).map(([k,l])=>`<button class="chip ${m===k?"on":""}" onclick="state.chartMetric='${k}';render()">${l}</button>`).join("")}</div>
+      ${chartSVG(pts,m)}
+      <div class="smallnote">${pts.length} kirjattua treeniä · uusin arvo ${fmtW(pts[pts.length-1][m])} kg${m==="vol"?" (paino × toistot yhteensä)":""}${m==="e1rm"?" · 1RM arvioitu Epleyn kaavalla painosta ja toistoista":""}.</div>
+    </div>`;
+  }
+  return tabs+(hist.length?hist.map(h=>histCard(h)).join(""):'<div class="empty">Ei vielä tallennettuja treenejä</div>');
+}
+window.delWorkout=id=>{
+  if(!confirm("Poistetaanko treeni pysyvästi?"))return;
+  S.set(pk("history"),S.get(pk("history"),[]).filter(h=>h.id!==id));
+  state.openHist=null;render();
+};
+
+/* Asetukset */
+function vSettings(){
+  const th=document.documentElement.dataset.theme;
+  return `<div class="card">
+    <h3 style="font-size:15px; margin-bottom:8px">Teema</h3>
+    <div class="chips">
+      <button class="chip ${th==="dark"?"on":""}" onclick="setTheme('dark')">🌙 Tumma</button>
+      <button class="chip ${th==="light"?"on":""}" onclick="setTheme('light')">☀️ Vaalea</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:15px; margin-bottom:8px">Treenitavoite</h3>
+    <div class="chips">${Object.keys(GOALS).map(k=>`<button class="chip ${S.get(pk("goal"),"Lihaskasvu")===k?"on":""}" onclick="S.set(pk('goal'),'${k}');render()">${k}</button>`).join("")}</div>
+    <div class="smallnote">Ohjaa generoitujen treenien sarja- ja toistomääriä: ${Object.entries(GOALS).map(([k,v])=>`${k} ${v.sets}×${v.reps}`).join(" · ")}.</div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:15px; margin-bottom:8px">✨ AI-brief (valinnainen)</h3>
+    <div class="field"><label>Anthropic API-avain</label>
+      <input type="password" value="${esc(S.get("apikey",""))}" placeholder="sk-ant-…"
+        onchange="S.set('apikey',this.value.trim());render()" style="width:100%; padding:13px; border-radius:12px; background:var(--surface2); border:1px solid var(--border)">
+    </div>
+    <div class="smallnote">Kun avain on asetettu, treenin yhteenvetoon ilmestyy nappi, joka luo sanallisen valmentaja-briefin AI:lla (Claude Haiku, kustannus avaimen omistajalle tyypillisesti alle sentin per brief). Avain tallentuu vain tähän selaimeen — ei mihinkään palvelimelle. Avaimen saa osoitteesta console.anthropic.com.</div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:15px; margin-bottom:8px">Tiedot — profiili: ${esc(state.profile)}</h3>
+    <button class="btn secondary" onclick="exportData()">⬇ Vie varmuuskopio (JSON)</button>
+    <button class="btn secondary" onclick="$('importFile').click()">⬆ Tuo varmuuskopio</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
+    <div class="smallnote">Tiedot tallentuvat vain tähän selaimeen. Vie varmuuskopio säännöllisesti — sillä myös siirrät historian toiselle laitteelle.</div>
+  </div>
+  <div class="card">
+    <button class="btn secondary" onclick="state.profile=null;go('profiles')">Vaihda profiilia</button>
+  </div>
+  <div class="smallnote" style="text-align:center">Treeniloki · v1.0 · liikepankissa ${LIIKKEET.length} liikettä</div>`;
+}
+window.setTheme=t=>{document.documentElement.dataset.theme=t;S.set("theme",t);render()};
+window.exportData=()=>{
+  const data={profile:state.profile,exported:new Date().toISOString(),
+    history:S.get(pk("history"),[])};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`treeniloki-${state.profile}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+};
+window.importData=inp=>{
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{
+    const d=JSON.parse(r.result);
+    if(!Array.isArray(d.history))throw 0;
+    const cur=S.get(pk("history"),[]);
+    const ids=new Set(cur.map(h=>h.id));
+    const merged=[...cur,...d.history.filter(h=>!ids.has(h.id))].sort((a,b)=>b.startedAt-a.startedAt);
+    S.set(pk("history"),merged);
+    alert("Tuotu! Historiassa nyt "+merged.length+" treeniä.");render();
+  }catch(e){alert("Tiedoston luku epäonnistui — tarkista että kyseessä on Treenilokin varmuuskopio.")}};
+  r.readAsText(f);
+};
+
+/* ---------- Käynnistys ---------- */
+if(location.protocol.startsWith("http")&&"serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js").catch(()=>{});
+}
+if(state.profile){
+  state.active=S.get(pk("active"),null);
+  state.view=state.active?"workout":"home";
+}
+render();
+</script>
+</body>
+</html>

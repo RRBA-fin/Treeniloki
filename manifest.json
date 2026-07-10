@@ -1,0 +1,30 @@
+{
+  "name": "Treeniloki",
+  "short_name": "Treeniloki",
+  "description": "Kuntosalitreenien suunnittelu, kirjaus ja seuranta selaimessa. PWA, toimii offline, data pysyy omalla laitteella.",
+  "lang": "fi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F1214",
+  "theme_color": "#0F1214",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
