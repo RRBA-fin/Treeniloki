@@ -122,6 +122,12 @@ input,select{font-family:inherit; font-size:16px; color:var(--text)}
   width:100%; padding:13px; border-radius:12px; background:var(--surface2);
   border:1px solid var(--border); margin-bottom:10px;
 }
+.xclose{
+  width:38px; height:38px; border-radius:10px; background:var(--surface2);
+  border:1px solid var(--border); font-size:15px; font-weight:700; color:var(--muted);
+  display:flex; align-items:center; justify-content:center; flex:none;
+}
+.xclose:active{background:var(--danger); color:#fff}
 .pickrow{
   padding:13px 6px; border-bottom:1px solid var(--border);
   display:flex; justify-content:space-between; align-items:center;
@@ -402,7 +408,14 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const fmtDate=ts=>new Date(ts).toLocaleDateString("fi-FI",{weekday:"short",day:"numeric",month:"numeric",year:"numeric"});
 const fmtW=w=>(w%1===0?w:w.toFixed(1).replace(".",","));
 
-function go(v){state.view=v;render()}
+function go(v){state.sheet=null;state.view=v;history.pushState({view:v},"");render()}
+window.addEventListener("popstate",e=>{
+  const s=e.state||{view:state.profile?"home":"profiles"};
+  state.sheet=s.sheet||null;
+  state.view=s.view||(state.profile?"home":"profiles");
+  render();
+  if(state.sheet==="picker"&&state.view==="plan")renderPicker();
+});
 
 function stepperHTML(label,path,val,step,min,unit){
   return `<div>
@@ -566,8 +579,16 @@ window.setTarget=k=>{
 };
 
 /* Liikevalitsin */
-window.openPicker=()=>{state.pickerSearch="";state.pickerFilter="Kaikki";renderPicker()};
-window.closePicker=()=>{$("picker").innerHTML=""};
+window.openPicker=()=>{
+  state.pickerSearch="";state.pickerFilter="Kaikki";
+  state.sheet="picker";
+  history.pushState({view:state.view,sheet:"picker"},"");
+  renderPicker();
+};
+window.closePicker=()=>{
+  if(state.sheet==="picker"){history.back();return}
+  const p=$("picker");if(p)p.innerHTML="";
+};
 function renderPicker(){
   const q=state.pickerSearch.toLowerCase(),f=state.pickerFilter;
   const list=LIIKKEET.filter(l=>
@@ -575,6 +596,10 @@ function renderPicker(){
     (!q||l.fi.toLowerCase().includes(q)||l.en.toLowerCase().includes(q)));
   $("picker").innerHTML=`<div class="modal" onclick="if(event.target===this)closePicker()">
     <div class="sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+        <h3 style="font-size:16px">Valitse liike</h3>
+        <button class="xclose" onclick="closePicker()">✕</button>
+      </div>
       <input class="search" placeholder="Hae liikettä…" value="${esc(state.pickerSearch)}"
         oninput="state.pickerSearch=this.value;renderPicker();this.focus()" autofocus>
       <div class="chips">${RYHMAT.map(r=>`<button class="chip ${f===r?"on":""}" onclick="state.pickerFilter='${r}';renderPicker()">${r}</button>`).join("")}</div>
@@ -858,7 +883,7 @@ function vSettings(){
   <div class="card">
     <button class="btn secondary" onclick="state.profile=null;go('profiles')">Vaihda profiilia</button>
   </div>
-  <div class="smallnote" style="text-align:center">Treeniloki · v1.0 · liikepankissa ${LIIKKEET.length} liikettä</div>`;
+  <div class="smallnote" style="text-align:center">Treeniloki · v1.1 · liikepankissa ${LIIKKEET.length} liikettä</div>`;
 }
 window.setTheme=t=>{document.documentElement.dataset.theme=t;S.set("theme",t);render()};
 window.exportData=()=>{
@@ -893,6 +918,7 @@ if(state.profile){
   state.active=S.get(pk("active"),null);
   state.view=state.active?"workout":"home";
 }
+history.replaceState({view:state.view},"");
 render();
 </script>
 </body>
