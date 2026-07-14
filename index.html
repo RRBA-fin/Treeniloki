@@ -133,6 +133,13 @@ input,select{font-family:inherit; font-size:16px; color:var(--text)}
   display:flex; justify-content:space-between; align-items:center;
 }
 .pickrow:active{background:var(--surface2)}
+.infobtn{
+  width:28px; height:28px; border-radius:50%; flex:none;
+  background:var(--surface2); border:1px solid var(--border); color:var(--muted);
+  font-family:Georgia,serif; font-style:italic; font-weight:800; font-size:14px;
+  display:flex; align-items:center; justify-content:center;
+}
+.infobtn:active{background:var(--accent); color:#fff; border-color:var(--accent)}
 
 /* Bottom nav */
 .nav{
@@ -272,10 +279,173 @@ const LIIKKEET=[
 {id:"farmari",fi:"Farmarikävely",en:"Farmer's Carry",r:"Toiminnallinen",f:"pull",laite:"käsipainot"},
 {id:"boxjump",fi:"Boksihyppy",en:"Box Jump",r:"Toiminnallinen",f:"legs",laite:"keho"},
 {id:"soutulaite",fi:"Soutulaite",en:"Rowing Machine",r:"Toiminnallinen",f:"pull",laite:"kone"},
-{id:"kelkka",fi:"Kelkan työntö",en:"Sled Push",r:"Toiminnallinen",f:"legs",laite:"muu"}
+{id:"kelkka",fi:"Kelkan työntö",en:"Sled Push",r:"Toiminnallinen",f:"legs",laite:"muu"},
+{id:"smith-penkki",fi:"Penkkipunnerrus smithissä",en:"Smith Bench Press",r:"Rinta",f:"push",laite:"smith"},
+{id:"vinopenkki-kone",fi:"Vinopenkkipunnerrus koneella",en:"Incline Press Machine",r:"Rinta",f:"push",laite:"kone"},
+{id:"talja-alhaalta",fi:"Ristikkäistalja alhaalta",en:"Low Cable Fly",r:"Rinta",f:"push",laite:"talja"},
+{id:"chinup",fi:"Leuanveto vastaotteella",en:"Chin-up",r:"Selkä",f:"pull",laite:"keho"},
+{id:"avustettu-leuka",fi:"Avustettu leuanveto",en:"Assisted Pull-up",r:"Selkä",f:"pull",laite:"kone"},
+{id:"talja-soutu-1k",fi:"Yhden käden taljasoutu",en:"Single-Arm Cable Row",r:"Selkä",f:"pull",laite:"talja"},
+{id:"suora-talja",fi:"Suorin käsin ylätalja",en:"Straight-Arm Pulldown",r:"Selkä",f:"pull",laite:"talja"},
+{id:"pendlay",fi:"Pendlay-soutu",en:"Pendlay Row",r:"Selkä",f:"pull",laite:"tanko"},
+{id:"trapbar",fi:"Trap bar -maastaveto",en:"Trap Bar Deadlift",r:"Jalat",f:"legs",laite:"tanko"},
+{id:"kavelevat",fi:"Kävelevät askelkyykyt",en:"Walking Lunge",r:"Jalat",f:"legs",laite:"käsipainot"},
+{id:"pistooli",fi:"Pistoolikyykky",en:"Pistol Squat",r:"Jalat",f:"legs",laite:"keho"},
+{id:"pakarapotku",fi:"Pakarapotku taljassa",en:"Cable Kickback",r:"Jalat",f:"legs",laite:"talja"},
+{id:"lantionnosto-1j",fi:"Yhden jalan lantionnosto",en:"Single-Leg Hip Thrust",r:"Jalat",f:"legs",laite:"keho"},
+{id:"seinaistunta",fi:"Seinäistunta",en:"Wall Sit",r:"Jalat",f:"legs",laite:"keho"},
+{id:"push-press",fi:"Push press",en:"Push Press",r:"Olkapäät",f:"push",laite:"tanko"},
+{id:"olka-kone",fi:"Pystypunnerrus koneella",en:"Shoulder Press Machine",r:"Olkapäät",f:"push",laite:"kone"},
+{id:"ez-hauis",fi:"Hauiskääntö EZ-tangolla",en:"EZ-Bar Curl",r:"Kädet",f:"pull",laite:"tanko"},
+{id:"kaanteinen-hauis",fi:"Käänteinen hauiskääntö",en:"Reverse Curl",r:"Kädet",f:"pull",laite:"tanko"},
+{id:"woodchop",fi:"Kierto taljassa (woodchop)",en:"Cable Woodchop",r:"Keskivartalo",f:"core",laite:"talja"},
+{id:"superman",fi:"Superman-liike",en:"Superman",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"istumaannousu",fi:"Istumaannousu",en:"Sit-up",r:"Keskivartalo",f:"core",laite:"keho"},
+{id:"sivutaivutus",fi:"Sivutaivutus käsipainolla",en:"Dumbbell Side Bend",r:"Keskivartalo",f:"core",laite:"käsipainot"},
+{id:"rinnalleveto",fi:"Rinnalleveto",en:"Power Clean",r:"Toiminnallinen",f:"pull",laite:"tanko"},
+{id:"tempaus",fi:"Tempaus",en:"Snatch",r:"Toiminnallinen",f:"pull",laite:"tanko"},
+{id:"kb-tempaus",fi:"Kahvakuulatempaus",en:"Kettlebell Snatch",r:"Toiminnallinen",f:"pull",laite:"kahvakuula"},
+{id:"turkkilainen",fi:"Turkkilainen ylösnousu",en:"Turkish Get-up",r:"Toiminnallinen",f:"core",laite:"kahvakuula"},
+{id:"wallball",fi:"Wall ball",en:"Wall Ball",r:"Toiminnallinen",f:"push",laite:"muu"},
+{id:"battleropes",fi:"Battle ropes",en:"Battle Ropes",r:"Toiminnallinen",f:"core",laite:"muu"},
+{id:"juoksumatto",fi:"Juoksumatto",en:"Treadmill",r:"Kardio",f:"legs",laite:"kardio"},
+{id:"kuntopyora",fi:"Kuntopyörä",en:"Stationary Bike",r:"Kardio",f:"legs",laite:"kardio"},
+{id:"crosstrainer",fi:"Crosstrainer",en:"Elliptical",r:"Kardio",f:"legs",laite:"kardio"},
+{id:"porraskone",fi:"Porraskone",en:"Stair Climber",r:"Kardio",f:"legs",laite:"kardio"},
+{id:"skierg",fi:"Hiihtolaite (SkiErg)",en:"SkiErg",r:"Kardio",f:"pull",laite:"kardio"},
+{id:"assaultbike",fi:"Assault bike",en:"Assault Bike",r:"Kardio",f:"legs",laite:"kardio"},
+{id:"hyppynaru",fi:"Hyppynaru",en:"Jump Rope",r:"Kardio",f:"legs",laite:"kardio"}
 ];
-const KOHTEET=["Selkä","Rinta","Jalat","Olkapäät","Kädet","Keskivartalo","Ylävartalo","Työntävät","Vetävät","Koko keho","Toiminnallinen"];
-const RYHMAT=["Kaikki","Rinta","Selkä","Jalat","Olkapäät","Kädet","Keskivartalo","Toiminnallinen"];
+const OHJEET={
+"penkki":"Makaa penkillä lapaluut yhteen vedettyinä, jalat tukevasti maassa. Laske tanko hallitusti rinnan alaosaan ja punnerra ylös suorille käsille. Pidä ranteet suorina ja kyynärpäät noin 45 asteen kulmassa vartaloon nähden.",
+"vinopenkki":"Säädä penkki 30–45 asteen kulmaan. Laske tanko solisluiden yläpuolelle rintakehän yläosaan ja punnerra ylös. Kohdistuu rinnan yläosaan.",
+"kp-penkki":"Makaa penkillä käsipainot rinnan tasolla. Punnerra painot ylös hieman toisiaan kohti ja laske hallitusti alas rinnan sivuille. Sallii tankoa laajemman liikeradan.",
+"kp-vinopenkki":"Vinopenkillä (30–45°) punnerra käsipainot rinnan yläosan päältä ylös ja laske hitaasti alas. Pidä lapaluut tuettuina penkkiä vasten.",
+"dippi":"Nojaa telineeseen suorin käsin, laske vartaloa kunnes olkavarret ovat vaakatasossa ja punnerra takaisin ylös. Kallista ylävartaloa eteen, jos haluat painottaa rintaa.",
+"punnerrus":"Kädet hartioita hieman leveämmällä, vartalo suorana lankussa. Laske rinta lähelle lattiaa ja punnerra ylös. Pidä keskivartalo tiukkana koko liikkeen ajan.",
+"ristikkais":"Seiso taljojen välissä kahvat ylätasolta. Vie kädet kaarevalla liikkeellä eteen yhteen rintalihaksia jännittäen ja palauta hallitusti. Pieni kyynärkulma säilyy koko ajan.",
+"penkki-kone":"Istu laitteeseen kahvat rinnan korkeudella. Punnerra kahvat eteen suorille käsille ja palauta hitaasti. Hyvä turvallinen vaihtoehto vapaille painoille.",
+"leuanveto":"Riipu tangossa myötäotteella hartioita leveämmällä. Vedä leuka tangon yli lapaluita alas ja yhteen vetäen, laske hallitusti täysin suorille käsille.",
+"ylatalja":"Istu laitteeseen ja tartu tankoon leveällä myötäotteella. Vedä tanko rintakehän yläosaan lapaluita alaspäin vetäen ja palauta hallitusti ylös.",
+"kulmasoutu":"Etunoja noin 45 asteen kulmassa selkä suorana. Vedä tanko alavatsaa kohti kyynärpäät läheltä vartaloa ja laske hallitusti. Älä pyöristä alaselkää.",
+"kp-soutu":"Tue toinen käsi ja polvi penkkiin, selkä suorana. Vedä käsipaino lantiota kohti kyynärpää edellä ja laske hitaasti alas.",
+"alatalja":"Istu jalat tuettuina, selkä suorana. Vedä kahva alavatsaan lapaluita yhteen puristaen ja palauta käsivarret suoriksi hallitusti.",
+"t-soutu":"Seiso tangon yllä etunojassa selkä suorana. Vedä kahvasta tankoa rintaa kohti ja laske hallitusti. Pidä keskivartalo tiukkana.",
+"maastaveto":"Tanko lähellä sääriä, selkä suorana ja lantio takana. Nosta tanko ojentamalla jalat ja lantio samanaikaisesti, lukitse seisten. Laske hallitusti samaa rataa alas.",
+"selanojennus":"Asetu selänojennuspenkkiin lantio tuen päälle. Laske ylävartalo alas ja nosta selkä suoraksi vartalon jatkeeksi. Vältä yliojennusta.",
+"facepull":"Vedä köysikahva ylätaljasta kasvoja kohti kyynärpäät korkealla ja levitä kädet lopussa. Vahvistaa takaolkapäitä ja parantaa ryhtiä.",
+"pullover":"Seiso taljaa kohti suorin käsin, kahva ylhäällä. Vedä suorilla käsillä kaaressa alas reisiin asti leveää selkälihasta jännittäen ja palauta hallitusti.",
+"olankohautus":"Seiso käsipainot sivuilla. Kohauta hartiat suoraan ylös kohti korvia, pidä hetki ylhäällä ja laske hitaasti. Älä pyöritä olkapäitä.",
+"kyykky":"Tanko yläselän päällä, jalat hartianleveydellä. Kyykkää lantio taakse ja alas vähintään reidet vaakatasoon, nouse ylös kantapäiden kautta työntäen. Pidä rinta ylhäällä ja polvet varpaiden suunnassa.",
+"etukyykky":"Tanko hartioiden etupuolella kyynärpäät korkealla. Kyykkää pystyasennossa alas ja nouse ylös. Painottaa etureisiä ja vaatii hyvän liikkuvuuden.",
+"goblet":"Pidä käsipainoa tai kahvakuulaa rinnan edessä molemmin käsin. Kyykkää syvään kyynärpäät polvien sisäpuolelle ja nouse ylös. Hyvä tekniikan opetteluun.",
+"smith-kyykky":"Kyykkää smith-laitteessa tanko yläselällä. Jalat hieman tangon etupuolella, laske hallitusti alas ja työnnä ylös. Laite tukee tasapainoa.",
+"jalkaprassi":"Istu laitteeseen jalat levyllä hartianleveydellä. Laske painoa polvet kohti rintaa hallitusti ja työnnä takaisin lähes suorille jaloille. Älä lukitse polvia.",
+"askelkyykky":"Astu pitkä askel eteen ja laske takapolvi lähelle lattiaa. Työnnä etujalalla takaisin ylös. Pidä ylävartalo pystyssä ja etupolvi varpaiden suunnassa.",
+"bulgarialainen":"Takajalka penkillä, etujalka edessä. Laske suoraan alas etureiden ja pakaran varassa ja nouse ylös. Tehokas yhden jalan liike.",
+"ojennus":"Istu laitteessa nilkat tyynyn takana. Ojenna polvet suoriksi etureisiä jännittäen ja laske hitaasti alas. Eristää etureidet.",
+"koukistus":"Koukista polvet laitteessa tyynyä kantapäillä vetäen ja palauta hallitusti. Eristää takareidet — tee liike rauhallisesti.",
+"rdl":"Seiso tanko reisillä, jalat lähes suorina. Työnnä lantio taakse ja laske tanko sääriä pitkin alas selkä suorana, kunnes takareidet venyvät. Nouse lantion ojennuksella ylös.",
+"lantionnosto":"Yläselkä penkkiä vasten, tanko lantiolla. Työnnä lantio ylös suoraan linjaan pakaroita puristaen ja laske hallitusti. Tehokkain pakaraliike.",
+"pohkeet-seisten":"Päkiät korokkeella, nouse varpaille niin ylös kuin pääset ja laske kantapäät hitaasti alas venytykseen. Täysi liikerata on tärkein.",
+"pohkeet-istuen":"Istu laitteessa polvet tyynyn alla. Nosta kantapäitä ylös päkiöiden varassa ja laske hitaasti venytykseen. Painottaa leveää kantalihasta.",
+"pystypunnerrus":"Seiso tanko hartioilla etupuolella. Punnerra tanko suoraan ylös pään yli ja laske hallitusti takaisin. Pidä keskivartalo tiukkana, älä notkista selkää.",
+"kp-pystypunnerrus":"Istu tai seiso käsipainot hartioiden tasolla. Punnerra painot ylös pään yläpuolelle ja laske hallitusti korvien tasolle.",
+"vipunosto-sivu":"Seiso käsipainot sivuilla. Nosta suorahkot kädet sivuille hartiatasoon ja laske hitaasti. Älä heilauta vauhtia vartalolla.",
+"vipunosto-etu":"Nosta käsipainot suorilla käsillä eteen hartiatasoon vuorotellen tai yhtä aikaa ja laske hallitusti. Kohdistuu etuolkapäähän.",
+"talja-vipu":"Nosta alataljan kahva suoralla kädellä sivulle hartiatasoon ja laske hitaasti. Talja pitää jännityksen koko liikeradalla.",
+"pystysoutu":"Vedä tanko läheltä vartaloa ylös rintakehän tasolle kyynärpäät edellä ja laske hallitusti. Pidä ote hartianleveydellä olkapäiden säästämiseksi.",
+"takaolkapaat":"Etunojassa käsipainot alhaalla. Nosta kädet sivuille lapaluita yhteen puristaen ja laske hitaasti. Kohdistuu takaolkapäihin.",
+"hauis-tanko":"Seiso tanko alhaalla vastaotteella. Koukista kyynärpäät ja nosta tanko rintaa kohti kyynärpäät paikallaan, laske hallitusti alas. Älä heiluta selkää.",
+"hauis-kp":"Koukista käsipainot vuorotellen tai yhtä aikaa ylös kämmenet ylöspäin kääntyen ja laske hitaasti. Pidä kyynärpäät kyljissä.",
+"hammer":"Koukista käsipainot ylös kämmenet vastakkain (vasaraote) ja laske hallitusti. Painottaa hauiksen ulkosyrjää ja kyynärvarsia.",
+"talja-hauis":"Koukista alataljan kahva ylös kyynärpäät paikallaan ja laske hitaasti. Jännitys säilyy koko liikeradalla.",
+"ojentaja-talja":"Seiso ylätaljan edessä kyynärpäät kyljissä. Ojenna kädet suoriksi alas ja palauta hallitusti kyynärkulmaan. Vain kyynärvarret liikkuvat.",
+"ranskalainen":"Makaa penkillä tanko suorilla käsillä ylhäällä. Taivuta kyynärpäistä ja laske tanko otsan taakse, ojenna takaisin ylös. Pidä olkavarret paikallaan.",
+"kapea-penkki":"Penkkipunnerrus kapealla (hartianlevyisellä) otteella kyynärpäät lähellä vartaloa. Laske tanko rinnan alaosaan ja punnerra ylös. Painottaa ojentajia.",
+"ojentaja-kp":"Pidä käsipainoa molemmin käsin pään yläpuolella. Laske paino niskan taakse kyynärpäistä taivuttaen ja ojenna takaisin ylös. Kyynärpäät osoittavat eteen.",
+"lankku":"Tue kyynärvarsiin ja varpaisiin, vartalo suorana linjana. Jännitä vatsa ja pakarat, hengitä rauhallisesti. Älä anna lantion notkahtaa.",
+"vatsarutistus":"Makaa selällään polvet koukussa. Rutista ylävartaloa kohti polvia lapaluut irti lattiasta ja laske hitaasti. Älä vedä niskasta.",
+"talja-rutistus":"Polvillaan ylätaljan alla köysi niskan takana. Rutista kyynärpäitä kohti polvia vatsalihaksia pyöristäen ja palauta hallitusti.",
+"jalkojen-nosto":"Riipu tangossa ja nosta suorat jalat vaakatasoon tai ylemmäs vatsalihaksilla. Laske hallitusti heilumatta. Kova keskivartaloliike.",
+"venalainen":"Istu lattialla nojaten hieman taakse jalat irti maasta. Kierrä ylävartaloa ja käsiä puolelta toiselle hallitusti. Painon kanssa haastavampi.",
+"kp-fly":"Makaa penkillä käsipainot ylhäällä. Laske kädet kaaressa sivuille pieni kyynärkulma säilyttäen ja tuo takaisin yhteen rintaa jännittäen.",
+"pec-deck":"Istu laitteeseen kyynärvarret tai kämmenet tyynyjä vasten. Tuo kädet kaaressa yhteen eteen rintaa puristaen ja palauta hallitusti.",
+"vino-fly":"Vinopenkillä laske käsipainot kaaressa sivuille ja tuo yhteen rinnan yläosan päälle. Pieni kyynärkulma säilyy koko liikkeen.",
+"kapea-ylatalja":"Vedä ylätalja V-kahvalla rintaan kyynärpäät läheltä vartaloa ja palauta hallitusti. Painottaa selän keskiosaa ja leveää selkälihasta.",
+"tuettu-soutu":"Makaa vatsallaan vinopenkillä käsipainot alhaalla. Souda painot ylös lapaluita yhteen vetäen ja laske hitaasti. Tukee alaselkää.",
+"yhden-kaden-talja":"Vedä ylätaljan kahva yhdellä kädellä alas kylkeen kyynärpää edellä ja palauta hallitusti. Hyvä puolierojen tasaamiseen.",
+"rack-pull":"Maastaveto telineestä polvien korkeudelta. Nosta tanko lantion ojennuksella lukitukseen ja laske telineeseen. Sallii isot kuormat yläselälle.",
+"vaakaleuka":"Riipu matalan tangon alla vartalo suorana, kantapäät maassa. Vedä rinta tankoon lapaluita yhteen puristaen ja laske hallitusti.",
+"hack":"Selkä laitteen tukea vasten, jalat levyllä. Kyykkää alas hallitusti ja työnnä ylös. Painottaa etureisiä turvallisella liikeradalla.",
+"sumomaastaveto":"Leveä haara-asento, varpaat ulospäin, ote tangosta jalkojen sisäpuolelta. Nosta tanko jalat ja lantio ojentaen selkä suorana. Lyhyempi liikerata, painottaa sisäreisiä ja pakaroita.",
+"good-morning":"Tanko yläselällä, jalat lähes suorina. Taivuta lantiosta eteen selkä suorana kunnes takareidet venyvät ja nouse ylös. Käytä maltillista painoa.",
+"step-up":"Astu korokkeelle yhdellä jalalla ja nouse ylös etujalan voimalla. Laske hallitusti alas. Käsipainot lisäävät kuormaa.",
+"adduktori":"Istu laitteessa jalat levitettyinä tyynyjä vasten. Purista polvet yhteen sisäreisillä ja palauta hallitusti.",
+"abduktori":"Istu laitteessa polvet yhdessä tyynyjä vasten. Työnnä polvet erilleen ulkoreisillä ja pakaroilla ja palauta hitaasti.",
+"pohkeet-prassi":"Aseta päkiät jalkaprässin levyn alareunaan jalat suorina. Työnnä levyä nilkkoja ojentamalla ja palauta venytykseen.",
+"nordic":"Polvillaan nilkat tuettuina. Laske vartaloa eteenpäin mahdollisimman hitaasti takareisillä jarruttaen ja auta käsillä takaisin ylös. Erittäin kova takareisiliike.",
+"arnold":"Aloita käsipainot leuan edessä kämmenet itseen päin. Punnerra ylös kiertäen kämmenet eteenpäin ja palauta kiertäen takaisin. Kuormittaa olkapäätä laajasti.",
+"landmine":"Tangon toinen pää maassa tai telineessä. Punnerra tangon päätä yhdellä kädellä ylös ja eteen viistosti. Olkapäälle ystävällinen punnerrus.",
+"talja-takaolkapaat":"Vedä ristikkäin taljojen kahvoja suorilla käsillä sivuille taakse takaolkapäitä jännittäen ja palauta hallitusti.",
+"preacher":"Olkavarret Scott-penkin tyynyllä. Koukista tanko ylös ja laske hitaasti lähes suorille käsille. Estää huijaamisen vartalolla.",
+"keskitetty":"Istu kyynärpää reiden sisäsyrjää vasten. Koukista käsipaino ylös rauhallisesti ja laske hitaasti. Eristää hauiksen tarkasti.",
+"penkkidippi":"Kädet penkin reunalla takana, jalat edessä. Laske lantiota alas kyynärpäitä taivuttaen ja punnerra ylös ojentajilla.",
+"kickback":"Etunojassa olkavarsi vaakatasossa kyljen vieressä. Ojenna kyynärvarsi suoraksi taakse ja palauta hallitusti. Kevyt paino, tarkka suoritus.",
+"rannekaanto":"Kyynärvarret tuettuina reisille tai penkille kämmenet ylöspäin. Koukista ranteita ylös painon kanssa ja laske hitaasti. Vahvistaa kyynärvarsia.",
+"sivulankku":"Tue kylkiasennossa kyynärvarteen, vartalo suorana linjana. Pidä lantio ylhäällä ja jännitä kylki. Vaihda puolta.",
+"vatsarulla":"Polvillaan rulla edessä. Rullaa eteenpäin vartalo suorana niin pitkälle kuin hallitset ja vedä vatsalihaksilla takaisin. Älä päästä alaselkää notkolle.",
+"pallof":"Seiso kylki taljaan päin kahva rinnan edessä. Ojenna kädet suoraan eteen antamatta taljan kiertää vartaloa ja palauta. Kiertoa vastustava keskivartaloliike.",
+"dead-bug":"Makaa selällään kädet ylös ja polvet 90 asteessa. Ojenna vastakkainen käsi ja jalka lähelle lattiaa alaselkä lattiassa ja palauta. Hidas ja hallittu.",
+"vuorikiipeilija":"Punnerrusasennossa tuo polvia vuorotellen rintaa kohti nopeaan tahtiin. Pidä lantio matalalla ja keskivartalo tiukkana.",
+"polvien-nosto":"Riipu tangossa ja nosta polvet kohti rintaa vatsalihaksilla. Laske hallitusti heilumatta. Kevyempi versio jalkojen nostosta.",
+"heilautus":"Heilauta kahvakuula jalkojen välistä lantion räjähtävällä ojennuksella rinnan korkeudelle. Kädet ovat vain koukku — voima tulee lantiosta ja pakaroista.",
+"kb-clean":"Heilauta kahvakuula jalkojen välistä ja vedä se tiiviisti rinnalle olkapäätä vasten kämmenen kiertyessä. Laske hallitusti takaisin heilautukseen.",
+"thruster":"Etukyykkää tanko tai käsipainot hartioilla ja jatka noususta suoraan punnerrukseen pään yli yhdellä liikkeellä. Koko kehon tehokas liike.",
+"burpee":"Mene kyykyn kautta punnerrusasentoon, tee punnerrus, ponnista jalat takaisin kyykkyyn ja hyppää ylös. Kova koko kehon kuntoliike.",
+"farmari":"Kanna raskaita käsipainoja tai kahvakuulia sivuilla kävellen ryhdikkäästi määrätty matka. Pidä hartiat takana ja keskivartalo tiukkana.",
+"boxjump":"Hyppää molemmilla jaloilla korokkeen päälle pehmeästi kyykkyyn laskeutuen. Astu alas — älä hypi alas polvien säästämiseksi.",
+"soutulaite":"Vedä rytmillä: jalat työntävät ensin, sitten vartalo kallistuu ja lopuksi kädet vetävät kahvan alarintaan. Palautus käänteisessä järjestyksessä.",
+"kelkka":"Työnnä kelkkaa matalassa etunojassa käsivarret ojennettuina tai koukussa lyhyin voimakkain askelin. Kuormittaa jalkoja ja kuntoa rajusti.",
+"smith-penkki":"Penkkipunnerrus smith-laitteessa. Laske tanko rinnan alaosaan ja punnerra ylös. Kiinteä liikerata — asemoi penkki huolella.",
+"vinopenkki-kone":"Punnerra laitteen kahvat vinosti ylös rinnan yläosalla ja palauta hallitusti. Turvallinen tapa kuormittaa ylärintaa.",
+"talja-alhaalta":"Vedä alataljojen kahvat kaaressa alhaalta ylös eteen yhteen rinnan yläosaa jännittäen ja palauta hallitusti.",
+"chinup":"Riipu tangossa vastaotteella (kämmenet itseen päin) hartianleveydellä. Vedä leuka tangon yli ja laske suorille käsille. Painottaa hauiksia leveän selän ohella.",
+"avustettu-leuka":"Leuanveto laitteessa, jossa polvi- tai jalkatuki keventää kuormaa. Vedä leuka tangon yli ja laske hallitusti. Hyvä askel kohti omaa leuanvetoa.",
+"talja-soutu-1k":"Souda alataljan kahva yhdellä kädellä kylkeen kyynärpää edellä ja palauta hallitusti. Salli pieni kierto lapaluusta.",
+"suora-talja":"Seiso ylätaljan edessä kädet suorina kahvalla. Paina kahva suorilla käsillä kaaressa alas reisiin ja palauta ylös. Eristää leveän selkälihaksen.",
+"pendlay":"Kulmasoutu, jossa tanko lasketaan lattiaan joka toiston välissä. Vedä tanko räjähtävästi alarintaan selkä vaakatasossa ja laske alas.",
+"trapbar":"Seiso trap bar -tangon sisällä ja nosta kahvoista jalat ja lantio ojentaen selkä suorana. Neutraali ote tekee vedosta selkäystävällisen.",
+"kavelevat":"Tee askelkyykky ja jatka suoraan seuraavaan askeleeseen eteenpäin kävellen. Pidä ylävartalo pystyssä ja askeleet hallittuina.",
+"pistooli":"Kyykkää yhdellä jalalla toinen jalka suorana edessä niin alas kuin pääset ja nouse ylös. Vaatii voimaa, tasapainoa ja liikkuvuutta — tukea saa esim. TRX:stä.",
+"pakarapotku":"Nilkassa taljan mansetti. Potkaise jalka suorana taakse ja ylös pakaraa puristaen ja palauta hallitusti. Eristää pakaran.",
+"lantionnosto-1j":"Yläselkä penkillä tai lattialla, toinen jalka ilmassa. Työnnä lantio ylös yhden jalan voimalla pakaraa puristaen ja laske hallitusti.",
+"seinaistunta":"Selkä seinää vasten, reidet vaakatasossa kuin istuisit tuolilla. Pidä asento — polttaa etureisiä isometrisesti.",
+"push-press":"Tanko hartioilla edessä. Ota pieni jousto polvista ja käytä jalkojen vauhtia punnertaaksesi tangon pään yli. Sallii pystypunnerrusta suuremmat painot.",
+"olka-kone":"Istu laitteeseen kahvat hartioiden tasolla. Punnerra kahvat ylös ja laske hallitusti. Tuettu ja turvallinen olkapunnerrus.",
+"ez-hauis":"Hauiskääntö EZ-tangolla kulmikkaista kahvoista. Koukista tanko ylös kyynärpäät paikallaan ja laske hitaasti. Ranteille suora tankoa mukavampi.",
+"kaanteinen-hauis":"Hauiskääntö myötäotteella (kämmenet alaspäin). Koukista tanko ylös ja laske hallitusti. Painottaa kyynärvarsia ja olkavarren ulkosyrjää.",
+"woodchop":"Vedä taljan kahva viistosti vartalon poikki ylhäältä alas tai alhaalta ylös keskivartaloa kiertäen. Lantio ja katse seuraavat liikettä.",
+"superman":"Makaa vatsallaan kädet eteen ojennettuina. Nosta kädet, rinta ja jalat irti lattiasta selän lihaksilla, pidä hetki ja laske alas.",
+"istumaannousu":"Makaa selällään polvet koukussa. Nouse istumaan vatsalihaksilla ja laske hallitusti alas. Älä vedä niskasta käsillä.",
+"sivutaivutus":"Seiso käsipaino toisessa kädessä. Taivuta vartaloa suoraan sivulle painon puolelle ja palauta pystyyn kylkilihaksilla. Vaihda puolta.",
+"rinnalleveto":"Nosta tanko lattialta räjähtävästi lantion ojennuksella ja ota se vastaan hartioille kyynärpäät edessä. Tekninen voimaliike — opettele kevyellä painolla.",
+"tempaus":"Nosta tanko lattialta yhdellä räjähtävällä liikkeellä suorille käsille pään yläpuolelle leveällä otteella. Vaativin tekninen nosto — harjoittele ohjatusti.",
+"kb-tempaus":"Heilauta kahvakuula jalkojen välistä ja vedä se yhdellä liikkeellä suoralle kädelle pään yläpuolelle kämmenen kiertyessä pehmeästi kuulan alle.",
+"turkkilainen":"Nouse makuulta seisomaan kahvakuula koko ajan suoralla kädellä pään yläpuolella vaiheittain: kyynärtuki, käsituki, silta, polviasento, seisomaan. Palaa samaa reittiä.",
+"wallball":"Kyykkää pallo rinnalla ja heitä se noususta seinään merkittyyn korkeuteen. Ota pallo vastaan suoraan seuraavaan kyykkyyn.",
+"battleropes":"Pidä köysien päistä ja tee vuorotahtisia tai yhtäaikaisia aaltoja käsillä matalassa asennossa. Pidä keskivartalo tiukkana — kova kuntopätkä.",
+"juoksumatto":"Kävele tai juokse tasaisella rytmillä. Säädä nopeutta ja kulmaa tavoitteen mukaan — ylämäkikävely on tehokas ja nivelystävällinen.",
+"kuntopyora":"Polje tasaisella tai intervallirytmillä. Säädä satula niin, että polvi jää alhaalla hieman koukkuun.",
+"crosstrainer":"Liiku laitteessa pitkin sujuvin askelin käsiä ja jalkoja käyttäen. Nivelystävällinen koko kehon kardiolaite.",
+"porraskone":"Askella portaita tasaisella rytmillä ryhdikkäästi. Älä nojaa koko painolla kaiteisiin — tuki vain kevyesti.",
+"skierg":"Vedä kahvat ylhäältä alas hiihtotyöntöä jäljitellen: kurota ylös, taivuta vartaloa ja vedä kädet reisien ohi. Kuormittaa ylävartaloa ja keskivartaloa.",
+"assaultbike":"Polje ja työnnä-vedä käsikahvoja yhtä aikaa. Teho kasvaa rajusti vauhdin mukana — erinomainen intervalleihin.",
+"hyppynaru":"Hyppele narua matalin päkiähypyin ranteita pyörittäen. Pidä kyynärpäät lähellä kylkiä ja rytmi tasaisena."
+};
+const ohje=id=>OHJEET[id]||"Ohjetta ei ole vielä lisätty tälle liikkeelle.";
+const KOHTEET=["Selkä","Rinta","Jalat","Olkapäät","Kädet","Keskivartalo","Ylävartalo","Työntävät","Vetävät","Koko keho","Toiminnallinen","Kardio"];
+const RYHMAT=["Kaikki","Rinta","Selkä","Jalat","Olkapäät","Kädet","Keskivartalo","Toiminnallinen","Kardio"];
 const liike=id=>LIIKKEET.find(l=>l.id===id)||{fi:"?",r:""};
 
 /* ---------- Tallennus ---------- */
@@ -347,9 +517,9 @@ const GEN={
   "Työntävät":{paa:["penkki","kp-penkki"],apu:[["pystypunnerrus","kp-pystypunnerrus"],["vinopenkki","kp-vinopenkki"],["vipunosto-sivu","talja-vipu"],["dippi","punnerrus"],["ojentaja-talja","ranskalainen"],["ristikkais","pec-deck"]]},
   "Vetävät":{paa:["maastaveto","kulmasoutu"],apu:[["leuanveto","ylatalja"],["alatalja","kp-soutu","tuettu-soutu"],["facepull","takaolkapaat"],["hauis-tanko","hauis-kp"],["olankohautus"],["pullover","rannekaanto"]]},
   "Koko keho":{paa:["kyykky","maastaveto"],apu:[["penkki","kp-penkki"],["kulmasoutu","alatalja"],["pystypunnerrus","kp-pystypunnerrus"],["ylatalja","leuanveto"],["rdl","lantionnosto"],["lankku","talja-rutistus"],["askelkyykky","heilautus"]]},
-  "Toiminnallinen":{paa:["thruster","heilautus"],apu:[["kb-clean","heilautus"],["burpee","vuorikiipeilija"],["farmari"],["boxjump","step-up"],["soutulaite","kelkka"],["lankku","sivulankku"]]}
+  "Toiminnallinen":{paa:["thruster","rinnalleveto","heilautus"],apu:[["kb-clean","kb-tempaus"],["burpee","vuorikiipeilija"],["farmari","turkkilainen"],["boxjump","step-up"],["wallball","battleropes"],["soutulaite","kelkka"],["lankku","sivulankku"]]}
 };
-const DEFW={keho:0,tanko:20,"käsipainot":10,talja:20,kone:30,smith:20,kahvakuula:12,muu:0};
+const DEFW={keho:0,tanko:20,"käsipainot":10,talja:20,kone:30,smith:20,kahvakuula:12,muu:0,kardio:0};
 window.generateWorkout=()=>{
   const t=state.gen.target;if(!t)return;
   const goal=S.get(pk("goal"),"Lihaskasvu"),g=GOALS[goal];
@@ -553,7 +723,10 @@ function vPlan(){
       <div class="exrow">
         <div class="exhead">
           <div><div class="exname">${L.fi}</div><div class="exmeta">${L.r} · ${L.laite}</div></div>
-          <button class="xdel" onclick="state.plan.exercises.splice(${i},1);render()">Poista</button>
+          <div style="display:flex; align-items:center; gap:8px">
+            <button class="infobtn" onclick="openInfo('${e.liikeId}',event)">i</button>
+            <button class="xdel" onclick="state.plan.exercises.splice(${i},1);render()">Poista</button>
+          </div>
         </div>
         <div class="exctrl">
           ${stepperHTML("Sarjat",`plan.exercises.${i}.sets`,e.sets,1,1)}
@@ -604,13 +777,35 @@ function renderPicker(){
         oninput="state.pickerSearch=this.value;renderPicker();this.focus()" autofocus>
       <div class="chips">${RYHMAT.map(r=>`<button class="chip ${f===r?"on":""}" onclick="state.pickerFilter='${r}';renderPicker()">${r}</button>`).join("")}</div>
       ${list.map(l=>`<div class="pickrow" onclick="pickExercise('${l.id}')">
-        <div><div class="exname">${l.fi}</div><div class="exmeta">${l.r} · ${l.laite}</div></div><div style="color:var(--accent); font-weight:800">＋</div>
+        <div style="flex:1; min-width:0"><div class="exname">${l.fi}</div><div class="exmeta">${l.r} · ${l.laite}</div></div>
+        <div style="display:flex; align-items:center; gap:12px">
+          <button class="infobtn" onclick="openInfo('${l.id}',event)">i</button>
+          <div style="color:var(--accent); font-weight:800">＋</div>
+        </div>
       </div>`).join("")||'<div class="empty">Ei osumia</div>'}
       <button class="btn secondary" onclick="closePicker()">Sulje</button>
     </div></div>`;
   const inp=$("picker").querySelector(".search");
   inp&&inp.focus();inp&&inp.setSelectionRange(inp.value.length,inp.value.length);
 }
+/* Liikkeen suoritusohje */
+window.openInfo=(id,ev)=>{
+  if(ev){ev.stopPropagation();ev.preventDefault()}
+  const L=liike(id);
+  let box=document.getElementById("infobox");
+  if(!box){box=document.createElement("div");box.id="infobox";document.body.appendChild(box)}
+  box.innerHTML=`<div class="modal" style="z-index:70; align-items:center; padding:20px" onclick="closeInfo()">
+    <div class="sheet" style="border-radius:20px; max-height:70vh" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:2px">
+        <h3 style="font-size:17px; margin:0">${L.fi}</h3>
+        <button class="xclose" onclick="closeInfo()">✕</button>
+      </div>
+      <div class="exmeta" style="margin-bottom:12px">${L.r} · ${L.laite}${L.en?` · ${L.en}`:""}</div>
+      <div style="font-size:14px; line-height:1.6">${ohje(id)}</div>
+    </div></div>`;
+};
+window.closeInfo=()=>{const b=document.getElementById("infobox");if(b)b.innerHTML=""};
+
 window.pickExercise=id=>{
   const sg=suggestFor(id);
   state.plan.exercises.push(sg
@@ -639,7 +834,8 @@ function vWorkout(){
   ${a.exercises.map((e,i)=>{const L=liike(e.liikeId);return `
     <div class="card">
       <div class="exhead"><div><div class="exname">${L.fi}</div>
-        <div class="exmeta">Tavoite: ${e.target.sets} × ${e.target.reps} @ ${fmtW(e.target.weight)} kg${L.laite==="keho"?" lisäpainoa":""}</div></div></div>
+        <div class="exmeta">Tavoite: ${e.target.sets} × ${e.target.reps} @ ${fmtW(e.target.weight)} kg${L.laite==="keho"?" lisäpainoa":""}</div></div>
+        <button class="infobtn" onclick="openInfo('${e.liikeId}',event)">i</button></div>
       <div style="display:flex; gap:8px; margin-top:8px; font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.05em">
         <span style="width:18px"></span><span style="flex:1; text-align:center">${L.laite==="keho"?"Lisäpaino (kg)":"Paino (kg)"}</span><span style="flex:1; text-align:center">Toistot</span><span style="width:40px"></span>
       </div>
@@ -883,7 +1079,7 @@ function vSettings(){
   <div class="card">
     <button class="btn secondary" onclick="state.profile=null;go('profiles')">Vaihda profiilia</button>
   </div>
-  <div class="smallnote" style="text-align:center">Treeniloki · v1.1 · liikepankissa ${LIIKKEET.length} liikettä</div>`;
+  <div class="smallnote" style="text-align:center">Treeniloki · v1.2 · liikepankissa ${LIIKKEET.length} liikettä</div>`;
 }
 window.setTheme=t=>{document.documentElement.dataset.theme=t;S.set("theme",t);render()};
 window.exportData=()=>{
