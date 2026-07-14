@@ -140,6 +140,12 @@ input,select{font-family:inherit; font-size:16px; color:var(--text)}
   display:flex; align-items:center; justify-content:center;
 }
 .infobtn:active{background:var(--accent); color:#fff; border-color:var(--accent)}
+.notearea{
+  width:100%; padding:10px; border-radius:10px; background:var(--surface2);
+  border:1px solid var(--border); color:var(--text); font:inherit; font-size:14px;
+  min-height:64px; margin-top:8px; resize:vertical;
+}
+select.search{appearance:auto; color:var(--text)}
 
 /* Bottom nav */
 .nav{
@@ -251,6 +257,7 @@ const LIIKKEET=[
 {id:"rack-pull",fi:"Telineveto (rack pull)",en:"Rack Pull",r:"Selkä",f:"pull",laite:"tanko"},
 {id:"vaakaleuka",fi:"Vaakaleuanveto",en:"Inverted Row",r:"Selkä",f:"pull",laite:"keho"},
 {id:"hack",fi:"Hack-kyykky",en:"Hack Squat",r:"Jalat",f:"legs",laite:"kone"},
+{id:"pendulum",fi:"Pendulum-kyykky",en:"Pendulum Squat",r:"Jalat",f:"legs",laite:"kone"},
 {id:"sumomaastaveto",fi:"Sumomaastaveto",en:"Sumo Deadlift",r:"Jalat",f:"legs",laite:"tanko"},
 {id:"good-morning",fi:"Hyvää huomenta",en:"Good Morning",r:"Jalat",f:"legs",laite:"tanko"},
 {id:"step-up",fi:"Askellus penkille",en:"Step-up",r:"Jalat",f:"legs",laite:"käsipainot"},
@@ -378,6 +385,7 @@ const OHJEET={
 "rack-pull":"Maastaveto telineestä polvien korkeudelta. Nosta tanko lantion ojennuksella lukitukseen ja laske telineeseen. Sallii isot kuormat yläselälle.",
 "vaakaleuka":"Riipu matalan tangon alla vartalo suorana, kantapäät maassa. Vedä rinta tankoon lapaluita yhteen puristaen ja laske hallitusti.",
 "hack":"Selkä laitteen tukea vasten, jalat levyllä. Kyykkää alas hallitusti ja työnnä ylös. Painottaa etureisiä turvallisella liikeradalla.",
+"pendulum":"Selkä laitteen tukea vasten, jalat levyllä. Laske kaarevaa rataa syvään kyykkyyn ja työnnä ylös. Kaari pitää jännityksen etureisissä koko liikeradan — syvyys on laitteen vahvuus.",
 "sumomaastaveto":"Leveä haara-asento, varpaat ulospäin, ote tangosta jalkojen sisäpuolelta. Nosta tanko jalat ja lantio ojentaen selkä suorana. Lyhyempi liikerata, painottaa sisäreisiä ja pakaroita.",
 "good-morning":"Tanko yläselällä, jalat lähes suorina. Taivuta lantiosta eteen selkä suorana kunnes takareidet venyvät ja nouse ylös. Käytä maltillista painoa.",
 "step-up":"Astu korokkeelle yhdellä jalalla ja nouse ylös etujalan voimalla. Laske hallitusti alas. Käsipainot lisäävät kuormaa.",
@@ -443,7 +451,7 @@ const OHJEET={
 "assaultbike":"Polje ja työnnä-vedä käsikahvoja yhtä aikaa. Teho kasvaa rajusti vauhdin mukana — erinomainen intervalleihin.",
 "hyppynaru":"Hyppele narua matalin päkiähypyin ranteita pyörittäen. Pidä kyynärpäät lähellä kylkiä ja rytmi tasaisena."
 };
-const ohje=id=>OHJEET[id]||"Ohjetta ei ole vielä lisätty tälle liikkeelle.";
+const ohje=id=>{const L=LIIKKEET.find(l=>l.id===id);return(L&&L.ohjeText)||OHJEET[id]||"Ohjetta ei ole vielä lisätty tälle liikkeelle."};
 const KOHTEET=["Selkä","Rinta","Jalat","Olkapäät","Kädet","Keskivartalo","Ylävartalo","Työntävät","Vetävät","Koko keho","Toiminnallinen","Kardio"];
 const RYHMAT=["Kaikki","Rinta","Selkä","Jalat","Olkapäät","Kädet","Keskivartalo","Toiminnallinen","Kardio"];
 const liike=id=>LIIKKEET.find(l=>l.id===id)||{fi:"?",r:""};
@@ -455,6 +463,11 @@ const S={
   del:k=>localStorage.removeItem("tl:"+k)
 };
 const pk=k=>"p:"+state.profile+":"+k;
+
+/* ---------- Omat liikkeet ---------- */
+const OMAT=S.get("omat",[]);
+OMAT.forEach(o=>{if(!LIIKKEET.some(l=>l.id===o.id))LIIKKEET.push(o)});
+function saveOmat(){S.set("omat",OMAT)}
 
 /* ---------- Progressiomoottori (double progression) ---------- */
 function lastPerf(liikeId){
@@ -484,18 +497,19 @@ function suggestFor(liikeId){
   const total=done.reduce((s,x)=>s+x.r,0),tgt=t.sets*t.reps;
   const met=done.length>=t.sets&&done.every(s=>s.r>=t.reps);
   const last=`Viimeksi ${done.map(s=>fmtW(s.w)+"×"+s.r).join(", ")}`;
+  const note=e.note||null;
   if(met){
     if(L.laite==="keho")
-      return{w,reps:t.reps+1,sets:t.sets,last,msg:`✅ Tavoite täyttyi → lisää toistoja: ${t.reps+1}/sarja`};
-    return{w:w+2.5,reps:t.reps,sets:t.sets,last,msg:`✅ Tavoite täyttyi → lisää painoa: ${fmtW(w+2.5)} kg`};
+      return{w,reps:t.reps+1,sets:t.sets,last,note,msg:`✅ Tavoite täyttyi → lisää toistoja: ${t.reps+1}/sarja`};
+    return{w:w+2.5,reps:t.reps,sets:t.sets,last,note,msg:`✅ Tavoite täyttyi → lisää painoa: ${fmtW(w+2.5)} kg`};
   }
   if(failStreak(liikeId,w)>=3){
     const nw=Math.max(0,Math.round(w*0.9/2.5)*2.5);
-    return{w:nw,reps:t.reps,sets:t.sets,last,msg:`⬇ Jäänyt vajaaksi 3 kertaa peräkkäin → kevennä ${fmtW(nw)} kg:aan ja rakenna uudelleen`};
+    return{w:nw,reps:t.reps,sets:t.sets,last,note,msg:`⬇ Jäänyt vajaaksi 3 kertaa peräkkäin → kevennä ${fmtW(nw)} kg:aan ja rakenna uudelleen`};
   }
   if(total>=tgt*0.85)
-    return{w,reps:t.reps,sets:t.sets,last,msg:`🔁 Lähellä (${total}/${tgt} toistoa) — samat painot, yritä täyttää toistot`};
-  return{w,reps:t.reps,sets:t.sets,last,msg:`🔁 Jäi vajaaksi (${total}/${tgt} toistoa) — samat painot uudestaan`};
+    return{w,reps:t.reps,sets:t.sets,last,note,msg:`🔁 Lähellä (${total}/${tgt} toistoa) — samat painot, yritä täyttää toistot`};
+  return{w,reps:t.reps,sets:t.sets,last,note,msg:`🔁 Jäi vajaaksi (${total}/${tgt} toistoa) — samat painot uudestaan`};
 }
 
 /* ---------- Vaihe 3: tavoitteet, generaattori, balanssi ---------- */
@@ -584,7 +598,8 @@ window.addEventListener("popstate",e=>{
   state.sheet=s.sheet||null;
   state.view=s.view||(state.profile?"home":"profiles");
   render();
-  if(state.sheet==="picker"&&state.view==="plan")renderPicker();
+  if(state.sheet!=="picker")state.pickerTarget=null;
+  if(state.sheet==="picker"&&(state.view==="plan"||state.view==="workout"))renderPicker();
 });
 
 function stepperHTML(label,path,val,step,min,unit){
@@ -733,7 +748,7 @@ function vPlan(){
           ${stepperHTML("Tavoitetoistot",`plan.exercises.${i}.reps`,e.reps,1,1)}
           ${stepperHTML(L.laite==="keho"?"Lisäpaino":"Paino",`plan.exercises.${i}.weight`,e.weight,2.5,0,"kg")}
         </div>
-        ${(sg=>sg?`<div class="smallnote">${sg.last}<br>${sg.msg}</div>`:"")(suggestFor(e.liikeId))}
+        ${(sg=>sg?`<div class="smallnote">${sg.last}<br>${sg.msg}${sg.note?`<br>📝 Viime kerralta: ${esc(sg.note)}`:""}</div>`:"")(suggestFor(e.liikeId))}
       </div>`}).join("")}
     <button class="btn ghost" onclick="openPicker()">＋ Lisää liike</button>
   </div>
@@ -752,7 +767,8 @@ window.setTarget=k=>{
 };
 
 /* Liikevalitsin */
-window.openPicker=()=>{
+window.openPicker=(target)=>{
+  state.pickerTarget=target||null;
   state.pickerSearch="";state.pickerFilter="Kaikki";
   state.sheet="picker";
   history.pushState({view:state.view,sheet:"picker"},"");
@@ -764,13 +780,14 @@ window.closePicker=()=>{
 };
 function renderPicker(){
   const q=state.pickerSearch.toLowerCase(),f=state.pickerFilter;
-  const list=LIIKKEET.filter(l=>
+  const list=LIIKKEET.filter(l=>!l.hidden&&
     (f==="Kaikki"||l.r===f)&&
-    (!q||l.fi.toLowerCase().includes(q)||l.en.toLowerCase().includes(q)));
+    (!q||l.fi.toLowerCase().includes(q)||(l.en||"").toLowerCase().includes(q)));
+  const swap=state.pickerTarget&&state.pickerTarget.mode==="swap";
   $("picker").innerHTML=`<div class="modal" onclick="if(event.target===this)closePicker()">
     <div class="sheet">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
-        <h3 style="font-size:16px">Valitse liike</h3>
+        <h3 style="font-size:16px">${swap?"Vaihda tilalle":"Valitse liike"}</h3>
         <button class="xclose" onclick="closePicker()">✕</button>
       </div>
       <input class="search" placeholder="Hae liikettä…" value="${esc(state.pickerSearch)}"
@@ -783,6 +800,7 @@ function renderPicker(){
           <div style="color:var(--accent); font-weight:800">＋</div>
         </div>
       </div>`).join("")||'<div class="empty">Ei osumia</div>'}
+      <button class="btn ghost" onclick="openOmaForm()">＋ Luo oma liike</button>
       <button class="btn secondary" onclick="closePicker()">Sulje</button>
     </div></div>`;
   const inp=$("picker").querySelector(".search");
@@ -808,10 +826,73 @@ window.closeInfo=()=>{const b=document.getElementById("infobox");if(b)b.innerHTM
 
 window.pickExercise=id=>{
   const sg=suggestFor(id);
-  state.plan.exercises.push(sg
-    ?{liikeId:id,sets:sg.sets,reps:sg.reps,weight:sg.w}
-    :{liikeId:id,sets:3,reps:10,weight:20});
+  const L=liike(id);
+  const ex=sg?{liikeId:id,sets:sg.sets,reps:sg.reps,weight:sg.w}
+    :{liikeId:id,sets:3,reps:10,weight:DEFW[L.laite]??20};
+  const t=state.pickerTarget;
+  if(t&&t.mode==="swap"&&state.active&&state.active.exercises[t.i]){
+    state.active.exercises[t.i]={
+      liikeId:id,target:{sets:ex.sets,reps:ex.reps,weight:ex.weight},
+      sets:Array.from({length:ex.sets},()=>({w:ex.weight,r:ex.reps,done:false}))
+    };
+    state.pickerTarget=null;state.exMenu=null;
+    persistActive();closePicker();render();return;
+  }
+  state.plan.exercises.push(ex);
   closePicker();render();
+};
+
+/* Oman liikkeen luonti ja hallinta */
+window.openOmaForm=()=>{
+  let box=document.getElementById("omabox");
+  if(!box){box=document.createElement("div");box.id="omabox";document.body.appendChild(box)}
+  const ryhmat=RYHMAT.filter(r=>r!=="Kaikki");
+  const laitteet=["tanko","käsipainot","talja","kone","keho","smith","kahvakuula","kardio","muu"];
+  const fopt=[["push","Työntävä (push)"],["pull","Vetävä (pull)"],["legs","Jalat (legs)"],["core","Keskivartalo (core)"]];
+  box.innerHTML=`<div class="modal" style="z-index:80; align-items:flex-end" onclick="if(event.target===this)closeOmaForm()">
+    <div class="sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+        <h3 style="font-size:16px">Luo oma liike</h3>
+        <button class="xclose" onclick="closeOmaForm()">✕</button>
+      </div>
+      <input id="omaNimi" class="search" placeholder="Liikkeen nimi *">
+      <div class="steplabel" style="margin-bottom:4px">Lihasryhmä</div>
+      <select id="omaRyhma" class="search">${ryhmat.map(r=>`<option>${r}</option>`).join("")}</select>
+      <div class="steplabel" style="margin-bottom:4px">Laite</div>
+      <select id="omaLaite" class="search">${laitteet.map(l=>`<option>${l}</option>`).join("")}</select>
+      <div class="steplabel" style="margin-bottom:4px">Tyyppi (vaikuttaa viikkobalanssiin)</div>
+      <select id="omaF" class="search">${fopt.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("")}</select>
+      <textarea id="omaOhje" class="notearea" placeholder="Suoritusohje (valinnainen — näkyy ⓘ-napista)"></textarea>
+      <button class="btn" style="margin-top:10px" onclick="saveOma()">Tallenna liike</button>
+      ${OMAT.length?`<h3 style="font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-top:16px">Omat liikkeet</h3>
+      ${OMAT.map((o,i)=>`<div class="pickrow">
+        <div><div class="exname">${o.fi}${o.hidden?' <span class="exmeta">(piilotettu)</span>':""}</div><div class="exmeta">${o.r} · ${o.laite}</div></div>
+        <button class="xdel" onclick="toggleOmaHidden(${i})">${o.hidden?"Palauta":"Piilota"}</button>
+      </div>`).join("")}
+      <div class="smallnote">Piilotus poistaa liikkeen valitsimesta, mutta historia ja käyrät säilyvät.</div>`:""}
+    </div></div>`;
+};
+window.closeOmaForm=()=>{const b=document.getElementById("omabox");if(b)b.innerHTML=""};
+window.saveOma=()=>{
+  const nimi=(document.getElementById("omaNimi").value||"").replace(/[<>&"]/g,"").trim();
+  if(!nimi){alert("Anna liikkeelle nimi.");return}
+  if(LIIKKEET.some(l=>!l.hidden&&l.fi.toLowerCase()===nimi.toLowerCase())){alert("Samanniminen liike on jo liikepankissa.");return}
+  const o={
+    id:"oma-"+Date.now().toString(36),fi:nimi,en:"",
+    r:document.getElementById("omaRyhma").value,
+    laite:document.getElementById("omaLaite").value,
+    f:document.getElementById("omaF").value,
+    ohjeText:(document.getElementById("omaOhje").value||"").replace(/[<>&"]/g,"").trim()||undefined,
+    oma:true
+  };
+  OMAT.push(o);LIIKKEET.push(o);saveOmat();
+  closeOmaForm();
+  if(state.sheet==="picker")renderPicker();
+};
+window.toggleOmaHidden=i=>{
+  OMAT[i].hidden=!OMAT[i].hidden;saveOmat();
+  openOmaForm();
+  if(state.sheet==="picker")renderPicker();
 };
 
 /* Treeni */
@@ -835,7 +916,14 @@ function vWorkout(){
     <div class="card">
       <div class="exhead"><div><div class="exname">${L.fi}</div>
         <div class="exmeta">Tavoite: ${e.target.sets} × ${e.target.reps} @ ${fmtW(e.target.weight)} kg${L.laite==="keho"?" lisäpainoa":""}</div></div>
-        <button class="infobtn" onclick="openInfo('${e.liikeId}',event)">i</button></div>
+        <div style="display:flex; gap:8px; align-items:center; flex:none">
+          <button class="infobtn" onclick="openInfo('${e.liikeId}',event)">i</button>
+          <button class="infobtn" style="font-family:inherit; font-style:normal; letter-spacing:1px" onclick="toggleExMenu(${i},event)">⋯</button>
+        </div></div>
+      ${state.exMenu===i?`<div style="display:flex; gap:8px; margin-top:8px">
+        <button class="btn secondary" style="flex:1; padding:10px; margin:0" onclick="swapActiveEx(${i})">🔁 Vaihda liike</button>
+        <button class="btn danger" style="flex:1; padding:10px; margin:0" onclick="removeActiveEx(${i})">🗑 Poista</button>
+      </div>`:""}
       <div style="display:flex; gap:8px; margin-top:8px; font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.05em">
         <span style="width:18px"></span><span style="flex:1; text-align:center">${L.laite==="keho"?"Lisäpaino (kg)":"Paino (kg)"}</span><span style="flex:1; text-align:center">Toistot</span><span style="width:40px"></span>
       </div>
@@ -853,11 +941,34 @@ function vWorkout(){
         </div>
         <button class="donebtn ${s.done?"on":""}" onclick="toggleSet(${i},${j})">✓</button>
       </div>`).join("")}
-      <button class="btn ghost" style="padding:10px" onclick="addSet(${i})">＋ Lisäsarja</button>
+      <div style="display:flex; gap:8px">
+        <button class="btn ghost" style="flex:1; padding:10px; margin:0" onclick="addSet(${i})">＋ Lisäsarja</button>
+        ${e.note||state.noteOpen===i?"":`<button class="btn ghost" style="flex:1; padding:10px; margin:0" onclick="state.noteOpen=${i};render()">📝 Muistiinpano</button>`}
+      </div>
+      ${e.note||state.noteOpen===i?`<textarea class="notearea" placeholder="Muistiinpano liikkeestä (esim. tuntemukset, säädöt)…" oninput="state.active.exercises[${i}].note=this.value" onblur="persistActive()">${esc(e.note||"")}</textarea>`:""}
     </div>`}).join("")}
+  <div class="card">
+    <h3 style="font-size:15px">Treenin muistiinpanot</h3>
+    <textarea class="notearea" placeholder="Fiilikset, vireystila, huomiot koko treenistä…" oninput="state.active.note=this.value" onblur="persistActive()">${esc(a.note||"")}</textarea>
+  </div>
   <button class="btn" onclick="finishWorkout()">Merkitse treeni valmiiksi ✔</button>
-  <button class="btn danger" onclick="cancelWorkout()">Hylkää treeni</button>`;
+  <button class="btn danger" onclick="cancelWorkout()">Hylkää treeni</button>
+  <div id="picker"></div>`;
 }
+window.toggleExMenu=(i,ev)=>{
+  if(ev)ev.stopPropagation();
+  state.exMenu=state.exMenu===i?null:i;render();
+};
+window.swapActiveEx=i=>{
+  openPicker({mode:"swap",i});
+};
+window.removeActiveEx=i=>{
+  const L=liike(state.active.exercises[i].liikeId);
+  if(!confirm(`Poistetaanko ${L.fi} tästä treenistä?`))return;
+  state.active.exercises.splice(i,1);
+  state.exMenu=null;state.noteOpen=null;
+  persistActive();render();
+};
 window.toggleSet=(i,j)=>{
   state.active.exercises[i].sets[j].done=!state.active.exercises[i].sets[j].done;
   persistActive();render();
@@ -895,7 +1006,8 @@ function vSummary(){
     const maxW=done.length?Math.max(...done.map(s=>s.w)):0;
     const ok=reps>=tgt&&done.length>=e.target.sets;
     rows+=`<div class="l"><span>${liike(e.liikeId).fi}</span>
-      <span class="${ok?"badge-ok":"badge-miss"}">${done.length}/${e.target.sets} sarjaa · ${reps}/${tgt} toistoa · max ${fmtW(maxW)} kg</span></div>`;
+      <span class="${ok?"badge-ok":"badge-miss"}">${done.length}/${e.target.sets} sarjaa · ${reps}/${tgt} toistoa · max ${fmtW(maxW)} kg</span></div>
+      ${e.note?`<div class="smallnote">📝 ${esc(e.note)}</div>`:""}`;
   });
   const pct=totalTarget?Math.round(totalDone/totalTarget*100):0;
   return `<div class="card">
@@ -904,6 +1016,7 @@ function vSummary(){
       Kesto ${dur} min · Toistotavoitteesta täyttyi <b style="color:${pct>=100?"var(--done)":"var(--accent)"}">${pct} %</b>
     </div>
     <div class="hdetail">${rows}</div>
+    ${a.note?`<div class="smallnote">📝 ${esc(a.note)}</div>`:""}
     <h3 style="font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-top:14px">Ehdotus seuraavaan treeniin</h3>
     <div class="hdetail" style="border-top:none; padding-top:2px">
       ${a.exercises.map(e=>{const sg=suggestFor(e.liikeId);
@@ -924,9 +1037,9 @@ window.aiBrief=async()=>{
   const goal=S.get(pk("goal"),"Lihaskasvu");
   const rows=a.exercises.map(e=>{
     const done=e.sets.filter(s=>s.done);
-    return `- ${liike(e.liikeId).fi}: tavoite ${e.target.sets}×${e.target.reps} @ ${e.target.weight} kg, toteuma: ${done.map(s=>fmtW(s.w)+" kg × "+s.r).join(", ")||"ei kirjattuja sarjoja"}`;
+    return `- ${liike(e.liikeId).fi}: tavoite ${e.target.sets}×${e.target.reps} @ ${e.target.weight} kg, toteuma: ${done.map(s=>fmtW(s.w)+" kg × "+s.r).join(", ")||"ei kirjattuja sarjoja"}${e.note?` — muistiinpano: ${e.note}`:""}`;
   }).join("\n");
-  const prompt=`Treeni: ${a.name} (kohde: ${a.target||"yleinen"}). Treenaajan tavoite: ${goal}. Kesto: ${Math.round((a.finishedAt-a.startedAt)/60000)} min.\nLiikkeet:\n${rows}\n\nKirjoita lyhyt valmentajan brief suomeksi (enintään 100 sanaa, yhtenäistä tekstiä ilman listoja): miten treeni meni suhteessa tavoitteisiin, mihin keskittyä seuraavalla saman lihasryhmän kerralla, ja yksi palautumisvinkki.`;
+  const prompt=`Treeni: ${a.name} (kohde: ${a.target||"yleinen"}). Treenaajan tavoite: ${goal}. Kesto: ${Math.round((a.finishedAt-a.startedAt)/60000)} min.${a.note?` Treenaajan oma muistiinpano: ${a.note}.`:""}\nLiikkeet:\n${rows}\n\nKirjoita lyhyt valmentajan brief suomeksi (enintään 100 sanaa, yhtenäistä tekstiä ilman listoja): miten treeni meni suhteessa tavoitteisiin, mihin keskittyä seuraavalla saman lihasryhmän kerralla, ja yksi palautumisvinkki.`;
   try{
     const res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
@@ -960,8 +1073,10 @@ function histCard(h,expandable=true){
     det=`<div class="hdetail">${h.exercises.map(e=>{
       const done=e.sets.filter(s=>s.done);
       const str=done.map(s=>`${fmtW(s.w)}×${s.r}`).join(", ")||"—";
-      return `<div class="l"><span>${liike(e.liikeId).fi}</span><span>${str}</span></div>`;
+      return `<div class="l"><span>${liike(e.liikeId).fi}</span><span>${str}</span></div>
+        ${e.note?`<div class="smallnote">📝 ${esc(e.note)}</div>`:""}`;
     }).join("")}
+    ${h.note?`<div class="smallnote">📝 ${esc(h.note)}</div>`:""}
     ${h.brief?`<div class="smallnote">✨ ${esc(h.brief)}</div>`:""}
     <button class="btn secondary" onclick="event.stopPropagation();repeatWorkout(${h.id})">🔁 Tee uudelleen pohjana</button>
     <button class="btn danger" onclick="event.stopPropagation();delWorkout(${h.id})">Poista</button></div>`;
@@ -1079,11 +1194,12 @@ function vSettings(){
   <div class="card">
     <button class="btn secondary" onclick="state.profile=null;go('profiles')">Vaihda profiilia</button>
   </div>
-  <div class="smallnote" style="text-align:center">Treeniloki · v1.2 · liikepankissa ${LIIKKEET.length} liikettä</div>`;
+  <div class="smallnote" style="text-align:center">Treeniloki · v1.3 · liikepankissa ${LIIKKEET.length} liikettä</div>`;
 }
 window.setTheme=t=>{document.documentElement.dataset.theme=t;S.set("theme",t);render()};
 window.exportData=()=>{
   const data={profile:state.profile,exported:new Date().toISOString(),
+    omat:OMAT,
     history:S.get(pk("history"),[])};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const a=document.createElement("a");
@@ -1101,6 +1217,11 @@ window.importData=inp=>{
     const ids=new Set(cur.map(h=>h.id));
     const merged=[...cur,...d.history.filter(h=>!ids.has(h.id))].sort((a,b)=>b.startedAt-a.startedAt);
     S.set(pk("history"),merged);
+    if(Array.isArray(d.omat)){
+      const oids=new Set(OMAT.map(o=>o.id));
+      d.omat.filter(o=>o&&o.id&&!oids.has(o.id)).forEach(o=>{OMAT.push(o);if(!LIIKKEET.some(l=>l.id===o.id))LIIKKEET.push(o)});
+      saveOmat();
+    }
     alert("Tuotu! Historiassa nyt "+merged.length+" treeniä.");render();
   }catch(e){alert("Tiedoston luku epäonnistui — tarkista että kyseessä on Treenilokin varmuuskopio.")}};
   r.readAsText(f);
